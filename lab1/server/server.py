@@ -229,7 +229,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
         def handle_entry(self, data):
             keys = list(data.keys())
-            if len(keys) > 1:
+            if 'delete' in keys:
                 delete_flag = data['delete'][0]
                 entry_id = int(data['id'][0])
                 if delete_flag == '1':
