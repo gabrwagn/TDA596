@@ -101,6 +101,7 @@ class BlackboardServer(HTTPServer):
 	# We send a received value to all the other vessels of the system
 	def propagate_value_to_vessels(self, path, action, key, value):
 		# We iterate through the vessel list
+                print('Preparing to propagate: {0}'.format(self.vessels))
 		for vessel in self.vessels:
 			# We should not send it to our own IP, or we would create an infinite loop of updates
 			if vessel != ("10.1.0.%s" % self.vessel_id):
