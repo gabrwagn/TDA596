@@ -63,11 +63,11 @@ class BlackboardServer(HTTPServer):
                 del self.store[key]
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
-	def contact_vessel(self, vessel, path, action, key, value):
+	def contact_vessel(self, vessel, path, action, key, value): # WRONG NUMBER OF INPUTS??
 		# the Boolean variable we will return
 		success = False
 		# The variables must be encoded in the URL format, through urllib.urlencode
-                content = dict()
+                content = dict()  # INTENDED METHOD INSTEAD OF action, key value ????
                 for idx, k in enumerate(key):
                     content[k] = value[idx]
 
@@ -197,6 +197,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 #------------------------------------------------------------------------------------------------------
 	def do_POST(self):
 	    print("Receiving a POST on %s" % self.path)
+	    self.set_HTTP_headers(200)
 	    # Here, we should check which path was requested and call the right logic based on it
 	    # We should also parse the data received
 	    # and set the headers for the client
