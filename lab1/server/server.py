@@ -48,18 +48,17 @@ class BlackboardServer(HTTPServer):
 #------------------------------------------------------------------------------------------------------
 	# We add a value received to the store
 	def add_value_to_store(self, value):
-		# We add the value to the store
-		pass
+                self.current_key += 1
+                self.store[self.current_key] = value
 #------------------------------------------------------------------------------------------------------
 	# We modify a value received in the store
 	def modify_value_in_store(self,key,value):
-		# we modify a value in the store if it exists
-		pass
+                self.store[key] = value
 #------------------------------------------------------------------------------------------------------
 	# We delete a value received from the store
 	def delete_value_in_store(self,key):
-		# we delete a value in the store if it exists
-		pass
+            if key in self.store:
+                del self.store[key]
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
 	def contact_vessel(self, vessel_ip, path, action, key, value):
@@ -102,7 +101,7 @@ class BlackboardServer(HTTPServer):
 			if vessel != ("10.1.0.%s" % self.vessel_id):
 				# A good practice would be to try again if the request failed
 				# Here, we do it only once
-				self.contact_vessel(vessel, path, action, key, value)		
+				self.contact_vessel(vessel, path, action, key, value)
 #------------------------------------------------------------------------------------------------------
 
 
@@ -137,7 +136,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 		post_data = parse_qs(self.rfile.read(length), keep_blank_values=1)
 		# we return the data
 		return post_data
-#------------------------------------------------------------------------------------------------------	
+#------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------
 # Request handling - GET
 #------------------------------------------------------------------------------------------------------
@@ -154,12 +153,33 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 		# We set the response status code to 200 (OK)
 		self.set_HTTP_headers(200)
 		# We should do some real HTML here
-		html_reponse = "<html><head><title>Basic Skeleton</title></head><body>This is the basic HTML content when receiving a GET</body></html>"
-		#In practice, go over the entries list, 
-		#produce the boardcontents part, 
+                header_fo = list(open('board_frontpage_header_template.html', 'r'))
+                body_fo = list(open('boardcontents_template.html', 'r'))
+                footer_fo = list(open('board_frontpage_footer_template.html', 'r'))
+
+                # Build board title
+                board_title = 'Blackboard {0}'.format(self.server.vessel_id)
+                # Build message entries
+                entry_fo = list(open('entry_template.html', 'r'))
+                entry_template_string = '\n'.join(entry_fo)
+
+                entries_string = ''
+                for key in self.server.store:
+                    action = '/board'
+                    entry = entry_template_string % (action, key, self.server.store[key]) + '\n'
+                    entries_string += entry
+
+                header_string = '\n'.join(header_fo)
+                body_string = '\n'.join(body_fo) % (board_title, entries_string)
+                footer_string = '\n'.join(footer_fo) % ('Gabriel Wagner & Lucas Nordmeyer')
+
+                html_response = '{0}\n{1}\n{2}'.format(header_string, body_string, footer_string)
+
+		#In practice, go over the entries list,
+		#produce the boardcontents part,
 		#then construct the full page by combining all the parts ...
-		
-		self.wfile.write(html_reponse)
+
+		self.wfile.write(html_response)
 #------------------------------------------------------------------------------------------------------
 	# we might want some other functions
 #------------------------------------------------------------------------------------------------------
@@ -171,19 +191,34 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 		# Here, we should check which path was requested and call the right logic based on it
 		# We should also parse the data received
 		# and set the headers for the client
+                data = self.parse_POST_request()
+                action = '/board'
+                keys = data.keys()
+                values = [data[key][0] for key in keys]
+
+                if len(keys) > 1:
+                    delete_flag = data['delete'][0]
+                    entry_id = int(data['id'][0])
+                    if delete_flag == '1':
+                        self.server.delete_value_in_store(entry_id)
+                    else:
+                        self.server.modify_value_in_store(entry_id, data['entry'][0])
+                else:
+                    self.server.add_value_to_store(data['entry'][0])
 
 		# If we want to retransmit what we received to the other vessels
 		retransmit = False # Like this, we will just create infinite loops!
 		if retransmit:
 			# do_POST send the message only when the function finishes
 			# We must then create threads if we want to do some heavy computation
-			# 
+			#
 			# Random content
-			thread = Thread(target=self.server.propagate_value_to_vessels,args=("action", "key", "value") )
+			thread = Thread(target=self.server.propagate_value_to_vessels,args=(action, keys, values) )
 			# We kill the process if we kill the server
 			thread.daemon = True
 			# We start the thread
 			thread.start()
+                return
 #------------------------------------------------------------------------------------------------------
 # POST Logic
 #------------------------------------------------------------------------------------------------------
