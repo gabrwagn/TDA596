@@ -216,19 +216,18 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             keys = data.keys()
             values = [data[key][0] for key in keys]
             # If we want to retransmit what we received to the other vessels
-            retransmit = True # Like this, we will just create infinite loops!
+            retransmit = False # Like this, we will just create infinite loops!
             if retransmit:
                 # do_POST send the message only when the function finishes
                 # We must then create threads if we want to do some heavy computation
                 # Random content
-                thread = Thread(target=self.server.propagate_value_to_vessels,args=(j, keys, values) )
+                thread = Thread(target=self.server.propagate_value_to_vessels,args=(action, keys, values) )
                 # We kill the process if we kill the server
                 thread.daemon = True
                 # We start the thread
                 thread.start()
 
         def handle_entry(self, data):
-            keys = data.keys()
             if len(keys) > 1:
                 delete_flag = data['delete'][0]
                 entry_id = int(data['id'][0])
