@@ -216,7 +216,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             keys = data.keys()
             values = [data[key][0] for key in keys]
             # If we want to retransmit what we received to the other vessels
-            retransmit = False # Like this, we will just create infinite loops!
+            retransmit = True # Like this, we will just create infinite loops!
             if retransmit:
                 # do_POST send the message only when the function finishes
                 # We must then create threads if we want to do some heavy computation
