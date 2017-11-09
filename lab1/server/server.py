@@ -18,10 +18,10 @@ from threading import  Thread # Thread Management
 
 import os
 # Global variables for HTML templates
-board_frontpage_footer_template = os.path.join(os.getcwd(), 'board_frontpage_footer_template.html')
-board_frontpage_header_template =  os.path.join(os.getcwd(), 'board_frontpage_header_template.html')
-boardcontents_template = os.path.join(os.getcwd(), 'boardcontents_template.html')
-entry_template = os.path.join(os.getcwd(), 'entry_template.html')
+board_frontpage_footer_template = os.path.join(os.getcwd(), 'server','board_frontpage_footer_template.html')
+board_frontpage_header_template =  os.path.join(os.getcwd(), 'server', 'board_frontpage_header_template.html')
+boardcontents_template = os.path.join(os.getcwd(), 'server', 'boardcontents_template.html')
+entry_template = os.path.join(os.getcwd(), 'server', 'entry_template.html')
 
 
 #------------------------------------------------------------------------------------------------------
