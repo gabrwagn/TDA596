@@ -221,7 +221,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 # do_POST send the message only when the function finishes
                 # We must then create threads if we want to do some heavy computation
                 # Random content
-                thread = Thread(target=self.server.propagate_value_to_vessels,args=(action, keys, values) )
+                thread = Thread(target=self.server.propagate_value_to_vessels,args=(action, action, keys, values) )
                 # We kill the process if we kill the server
                 thread.daemon = True
                 # We start the thread
