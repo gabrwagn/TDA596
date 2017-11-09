@@ -213,7 +213,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             self.handle_entry(data)
 
             action = '/relay'
-            keys = data.keys()
+            keys = list(data.keys())
             values = [data[key][0] for key in keys]
             # If we want to retransmit what we received to the other vessels
             retransmit = True # Like this, we will just create infinite loops!
@@ -228,6 +228,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 thread.start()
 
         def handle_entry(self, data):
+            keys = list(data.keys())
             if len(keys) > 1:
                 delete_flag = data['delete'][0]
                 entry_id = int(data['id'][0])
