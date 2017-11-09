@@ -16,11 +16,13 @@ from codecs import open # Open a file
 from threading import  Thread # Thread Management
 #------------------------------------------------------------------------------------------------------
 
+import os
 # Global variables for HTML templates
-board_frontpage_footer_template = ""
-board_frontpage_header_template = ""
-boardcontents_template = ""
-entry_template = ""
+board_frontpage_footer_template = os.path.join(os.cwd(), 'board_frontpage_footer_template.html')
+board_frontpage_header_template =  os.path.join(os.cwd(), 'board_frontpage_header_template.html')
+boardcontents_template = os.path.join(os.cwd(), 'boardcontents_template.html')
+entry_template = os.path.join(os.cwd(), 'entry_template.html')
+
 
 #------------------------------------------------------------------------------------------------------
 # Static variables definitions
@@ -153,14 +155,14 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 		# We set the response status code to 200 (OK)
 		self.set_HTTP_headers(200)
 		# We should do some real HTML here
-                header_fo = list(open('board_frontpage_header_template.html', 'r'))
-                body_fo = list(open('boardcontents_template.html', 'r'))
-                footer_fo = list(open('board_frontpage_footer_template.html', 'r'))
+                header_fo = list(open(board_frontpage_header_template, 'r'))
+                body_fo = list(open(boardcontents_template, 'r'))
+                footer_fo = list(open(board_frontpage_footer_template, 'r'))
 
                 # Build board title
                 board_title = 'Blackboard {0}'.format(self.server.vessel_id)
                 # Build message entries
-                entry_fo = list(open('entry_template.html', 'r'))
+                entry_fo = list(open(entry_template, 'r'))
                 entry_template_string = '\n'.join(entry_fo)
 
                 entries_string = ''
