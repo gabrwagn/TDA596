@@ -192,47 +192,51 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 # Request handling - POST
 #------------------------------------------------------------------------------------------------------
 	def do_POST(self):
-		print("Receiving a POST on %s" % self.path)
-		# Here, we should check which path was requested and call the right logic based on it
-		# We should also parse the data received
-		# and set the headers for the client
-                data = self.parse_POST_request()
-                action = '/board'
-                keys = data.keys()
-                values = [data[key][0] for key in keys]
+	    print("Receiving a POST on %s" % self.path)
+	    # Here, we should check which path was requested and call the right logic based on it
+	    # We should also parse the data received
+	    # and set the headers for the client
 
-                if len(keys) > 1:
-                    delete_flag = data['delete'][0]
-                    entry_id = int(data['id'][0])
-                    if delete_flag == '1':
-                        self.server.delete_value_in_store(entry_id)
-                    else:
-                        self.server.modify_value_in_store(entry_id, data['entry'][0])
-                else:
-                    self.server.add_value_to_store(data['entry'][0])
+            data = self.parse_POST_request()
 
-		# If we want to retransmit what we received to the other vessels
-		retransmit = False # Like this, we will just create infinite loops!
-		if retransmit:
-			# do_POST send the message only when the function finishes
-			# We must then create threads if we want to do some heavy computation
-			#
-			# Random content
-			thread = Thread(target=self.server.propagate_value_to_vessels,args=(action, keys, values) )
-			# We kill the process if we kill the server
-			thread.daemon = True
-			# We start the thread
-			thread.start()
-                return
+            if self.path == '/board':
+                self.handle_user_entry(data)
+            elif self.path == '/relay':
+                self.handle_entry(data)
+            return
 #------------------------------------------------------------------------------------------------------
 # POST Logic
 #------------------------------------------------------------------------------------------------------
 	# We might want some functions here as well
 #------------------------------------------------------------------------------------------------------
+    def handle_user_entry(self, data):
+        self.handle_entry(data)
 
+        action = '/relay'
+        keys = data.keys()
+        values = [data[key][0] for key in keys]
+        # If we want to retransmit what we received to the other vessels
+        retransmit = False # Like this, we will just create infinite loops!
+        if retransmit:
+            # do_POST send the message only when the function finishes
+            # We must then create threads if we want to do some heavy computation
+            # Random content
+            thread = Thread(target=self.server.propagate_value_to_vessels,args=(j, keys, values) )
+            # We kill the process if we kill the server
+            thread.daemon = True
+            # We start the thread
+            thread.start()
 
-
-
+    def handle_entry(self, data):
+        if len(keys) > 1:
+            delete_flag = data['delete'][0]
+            entry_id = int(data['id'][0])
+            if delete_flag == '1':
+                self.server.delete_value_in_store(entry_id)
+            else:
+                self.server.modify_value_in_store(entry_id, data['entry'][0])
+        else:
+            self.server.add_value_to_store(data['entry'][0])
 
 #------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------
