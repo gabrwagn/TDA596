@@ -68,8 +68,8 @@ class BlackboardServer(HTTPServer):
 		success = False
 		# The variables must be encoded in the URL format, through urllib.urlencode
                 content = dict()
-                for idx, key in enumerate(keys):
-                    content[key] = value[idx]
+                for idx, k in enumerate(key):
+                    content[k] = value[idx]
 
 		post_content = urlencode(content)
 		# the HTTP header must contain the type of data we are transmitting, here URL encoded
