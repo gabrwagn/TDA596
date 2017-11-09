@@ -63,7 +63,7 @@ class BlackboardServer(HTTPServer):
                 del self.store[key]
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
-	def contact_vessel(self, vessel_ip, path, action, key, value):
+	def contact_vessel(self, vessel, path, action, key, value):
 		# the Boolean variable we will return
 		success = False
 		# The variables must be encoded in the URL format, through urllib.urlencode
@@ -86,6 +86,7 @@ class BlackboardServer(HTTPServer):
 			# If we receive a HTTP 200 - OK
 			if status == 200:
 				success = True
+                                print('Success on sending post to: {0}'.format(vessel))
 		# We catch every possible exceptions
 		except Exception as e:
 			print "Error while contacting %s" % vessel
