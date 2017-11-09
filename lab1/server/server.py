@@ -101,7 +101,6 @@ class BlackboardServer(HTTPServer):
 	# We send a received value to all the other vessels of the system
 	def propagate_value_to_vessels(self, path, action, key, value):
 		# We iterate through the vessel list
-                print('Preparing to propagate: {0}'.format(self.vessels))
 		for vessel in self.vessels:
 			# We should not send it to our own IP, or we would create an infinite loop of updates
 			if vessel != ("10.1.0.%s" % self.vessel_id):
@@ -217,7 +216,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             keys = data.keys()
             values = [data[key][0] for key in keys]
             # If we want to retransmit what we received to the other vessels
-            retransmit = False # Like this, we will just create infinite loops!
+            retransmit = True # Like this, we will just create infinite loops!
             if retransmit:
                 # do_POST send the message only when the function finishes
                 # We must then create threads if we want to do some heavy computation
