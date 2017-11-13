@@ -244,7 +244,11 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         def handle_user_entry(self, data, entry_id=None):
             self.handle_entry(data)
 
-            action = '/relay/{0}'.format(entry_id)
+            if entry_id is not None:
+                action = server_base_path + '/' + entry_id
+            else:
+                action = server_base_path
+
             keys = list(data.keys())
             values = [data[key][0] for key in keys]
             # If we want to retransmit what we received to the other vessels
