@@ -215,11 +215,19 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             path_parts = self.path[1:].split('/')
             try:
                 base = path_parts[0]
+                # A post containing an ID (delete/modify)
                 entry_id = int(path_parts[1])
                 if base == client_base_path[1:]:
-                    self.handle_user_entry(entry_id, data)
+                    if len(path_parts) > 1:
+                        self.handle_user_entry(entry_id, data)
+                    else:
+                        self.handle_user_entry(data)
                 elif base == server_base_path[1:]:
-                    self.handle_entry(entry_id, data)
+                    if len(path_parts) > 1:
+                        self.handle_entry(entry_id, data)
+                    else:
+                        self.handle_entry(data)
+
             except IndexError:
                 print('Incorrect path formatting, should be /path/ID')
                 print('Your path was: {0}'.format(self.path))
@@ -232,7 +240,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 #------------------------------------------------------------------------------------------------------
 	# We might want some functions here as well
 #------------------------------------------------------------------------------------------------------
-        def handle_user_entry(self, entry_id, data):
+        def handle_user_entry(self, entry_id=None, data):
             self.handle_entry(data)
 
             action = '/relay/{0}'.format(entry_id)
@@ -250,9 +258,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 # We start the thread
                 thread.start()
 
-        def handle_entry(self, entry_id, data):
+        def handle_entry(self, entry_id=None, data):
             keys = list(data.keys())
-            if 'delete' in keys:
+            if 'delete' in keys and entry_id != None:
                 delete_flag = data['delete'][0]
                 if delete_flag == '1':
                     self.server.delete_value_in_store(entry_id)
@@ -260,7 +268,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                     self.server.modify_value_in_store(entry_id, data['entry'][0])
             else:
                 self.server.add_value_to_store(data['entry'][0])
-
 #------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------
 # Execute the code
