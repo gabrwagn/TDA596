@@ -265,7 +265,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
         def handle_entry(self, data, entry_id=None):
             keys = list(data.keys())
-            if 'delete' in keys and entry_id is not None:
+            if 'delete' in keys and entry_id is None:
                 delete_flag = data['delete'][0]
                 if delete_flag == '1':
                     print('Deleting value at: {0}'.format(entry_id))
