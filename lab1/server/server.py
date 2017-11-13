@@ -242,7 +242,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 	# We might want some functions here as well
 #------------------------------------------------------------------------------------------------------
         def handle_user_entry(self, data, entry_id=None):
-            self.handle_entry(data)
+            self.handle_entry(data, entry_id)
 
             if entry_id is not None:
                 action = server_base_path + '/' + str(entry_id)
