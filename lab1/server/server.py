@@ -218,8 +218,10 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                     self.handle_entry(entry_id, data)
             except IndexError:
                 print('Incorrect path formatting, should be /path/ID')
+                print('Your path was: {0}'.format(self.path))
             except ValueError:
                 print('Wrong type of ID, should be integer')
+                print('Your ID was: {0}'.format(path_parts[1]))
             return
 #------------------------------------------------------------------------------------------------------
 # POST Logic
