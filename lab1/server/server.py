@@ -66,6 +66,7 @@ class BlackboardServer(HTTPServer):
 	def contact_vessel(self, vessel, path, action, key, value): # WRONG NUMBER OF INPUTS??
 		# the Boolean variable we will return
 		success = False
+
 		# The variables must be encoded in the URL format, through urllib.urlencode
                 content = dict()  # INTENDED METHOD INSTEAD OF action, key value ????
                 for idx, k in enumerate(key):
@@ -145,7 +146,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 		post_data = parse_qs(self.rfile.read(length), keep_blank_values=1)
 		# we return the data
 		return post_data
-#------------------------------------------------------------------------------------------------------
+#------------------------------------------------------i-----------------------------------------------
 #------------------------------------------------------------------------------------------------------
 # Request handling - GET
 #------------------------------------------------------------------------------------------------------
@@ -172,9 +173,10 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 entry_fo = list(open(entry_template, 'r'))
                 entry_template_string = '\n'.join(entry_fo)
 
+                # Generate Entry-html, using id in the path
                 entries_string = ''
                 for key in self.server.store:
-                    action = '/board'
+                    action = '/board/{0}'.format(key)
                     entry = entry_template_string % (action, key, self.server.store[key]) + '\n'
                     entries_string += entry
 
@@ -182,6 +184,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 body_string = '\n'.join(body_fo) % (board_title, entries_string)
                 footer_string = '\n'.join(footer_fo) % ('Gabriel Wagner & Lucas Nordmeyer')
 
+                # Concatenate the different parts of the html page
                 html_response = '{0}\n{1}\n{2}'.format(header_string, body_string, footer_string)
 
 		#In practice, go over the entries list,
@@ -204,20 +207,29 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
             data = self.parse_POST_request()
 
-            if self.path == '/board':
-                self.handle_user_entry(data)
-            elif self.path == '/relay':
-                self.handle_entry(data)
+            # Path should be /base/ID
+            path_parts = self.path[1:].split('/')
+            try:
+                base = path_parts[0]
+                entry_id = int(path_parts[1])
+                if base == 'board':
+                    self.handle_user_entry(entry_id, data)
+                elif base == 'relay':
+                    self.handle_entry(entry_id, data)
+            except IndexError:
+                print('Incorrect path formatting, should be /path/ID')
+            except ValueError:
+                print('Wrong type of ID, should be integer')
             return
 #------------------------------------------------------------------------------------------------------
 # POST Logic
 #------------------------------------------------------------------------------------------------------
 	# We might want some functions here as well
 #------------------------------------------------------------------------------------------------------
-        def handle_user_entry(self, data):
+        def handle_user_entry(self, entry_id, data):
             self.handle_entry(data)
 
-            action = '/relay'
+            action = '/relay/{0}'.format(entry_id)
             keys = list(data.keys())
             values = [data[key][0] for key in keys]
             # If we want to retransmit what we received to the other vessels
@@ -232,12 +244,10 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 # We start the thread
                 thread.start()
 
-        def handle_entry(self, data):
+        def handle_entry(self, entry_id, data):
             keys = list(data.keys())
-            print(data)
             if 'delete' in keys:
                 delete_flag = data['delete'][0]
-                entry_id = int(data['id'][0])
                 if delete_flag == '1':
                     self.server.delete_value_in_store(entry_id)
                 else:
