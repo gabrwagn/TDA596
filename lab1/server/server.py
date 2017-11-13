@@ -27,6 +27,10 @@ entry_template = os.path.join(os.getcwd(), 'server', 'entry_template.html')
 #------------------------------------------------------------------------------------------------------
 # Static variables definitions
 PORT_NUMBER = 80
+
+# Added global variables
+client_base_path = '/board'
+server_base_path = '/relay'
 #------------------------------------------------------------------------------------------------------
 
 
@@ -176,7 +180,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 # Generate Entry-html, using id in the path
                 entries_string = ''
                 for key in self.server.store:
-                    action = '/board/{0}'.format(key)
+                    action = client_base_path + '/' + str(key)
                     entry = entry_template_string % (action, key, self.server.store[key]) + '\n'
                     entries_string += entry
 
@@ -212,9 +216,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             try:
                 base = path_parts[0]
                 entry_id = int(path_parts[1])
-                if base == 'board':
+                if base == client_base_path[1:]:
                     self.handle_user_entry(entry_id, data)
-                elif base == 'relay':
+                elif base == server_base_path[1:]:
                     self.handle_entry(entry_id, data)
             except IndexError:
                 print('Incorrect path formatting, should be /path/ID')
