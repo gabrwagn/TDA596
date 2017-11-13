@@ -216,14 +216,15 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             try:
                 base = path_parts[0]
                 # A post containing an ID (delete/modify)
-                entry_id = int(path_parts[1])
                 if base == client_base_path[1:]:
                     if len(path_parts) > 1:
+                        entry_id = int(path_parts[1])
                         self.handle_user_entry(data, entry_id)
                     else:
                         self.handle_user_entry(data)
                 elif base == server_base_path[1:]:
                     if len(path_parts) > 1:
+                        entry_id = int(path_parts[1])
                         self.handle_entry(data,  entry_id)
                     else:
                         self.handle_entry(data)
