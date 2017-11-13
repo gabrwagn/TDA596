@@ -67,15 +67,16 @@ class BlackboardServer(HTTPServer):
                 del self.store[key]
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
-	def contact_vessel(self, vessel, path, action, key, value): # WRONG NUMBER OF INPUTS??
+	def contact_vessel(self, vessel, path, key, value):
 		# the Boolean variable we will return
 		success = False
 
-		# The variables must be encoded in the URL format, through urllib.urlencode
-                content = dict()  # INTENDED METHOD INSTEAD OF action, key value ????
+                # Generate the content to send using the keys and the values
+                content = dict()
                 for idx, k in enumerate(key):
                     content[k] = value[idx]
 
+                # Encode the content
 		post_content = urlencode(content)
 		# the HTTP header must contain the type of data we are transmitting, here URL encoded
 		headers = {"Content-type": "application/x-www-form-urlencoded"}
@@ -108,14 +109,14 @@ class BlackboardServer(HTTPServer):
 		return success
 #------------------------------------------------------------------------------------------------------
 	# We send a received value to all the other vessels of the system
-	def propagate_value_to_vessels(self, path, action, key, value):
+	def propagate_value_to_vessels(self, path, key, value):
 		# We iterate through the vessel list
 		for vessel in self.vessels:
 			# We should not send it to our own IP, or we would create an infinite loop of updates
 			if vessel != ("10.1.0.%s" % self.vessel_id):
 				# A good practice would be to try again if the request failed
 				# Here, we do it only once
-				self.contact_vessel(vessel, path, action, key, value)
+				self.contact_vessel(vessel, path, key, value)
 #------------------------------------------------------------------------------------------------------
 
 
@@ -166,34 +167,26 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 	def do_GET_Index(self):
 		# We set the response status code to 200 (OK)
 		self.set_HTTP_headers(200)
-		# We should do some real HTML here
-                header_fo = list(open(board_frontpage_header_template, 'r'))
-                body_fo = list(open(boardcontents_template, 'r'))
-                footer_fo = list(open(board_frontpage_footer_template, 'r'))
 
                 # Build board title
                 board_title = 'Blackboard {0}'.format(self.server.vessel_id)
+
                 # Build message entries
                 entry_fo = list(open(entry_template, 'r'))
                 entry_template_string = '\n'.join(entry_fo)
-
-                # Generate Entry-html, using id in the path
                 entries_string = ''
                 for key in self.server.store:
-                    action = client_base_path + '/' + str(key)
-                    entry = entry_template_string % (action, key, self.server.store[key]) + '\n'
+                    path = client_base_path + '/' + str(key)
+                    entry = entry_template_string % (path, key, self.server.store[key]) + '\n'
                     entries_string += entry
 
+                # Turn the lines into strings (necessary to make the html work)
                 header_string = '\n'.join(header_fo)
-                body_string = '\n'.join(body_fo) % (board_title, entries_string)
-                footer_string = '\n'.join(footer_fo) % ('Gabriel Wagner & Lucas Nordmeyer')
+                body_string = '\n'.join(body_fo) % (board_title, entries_string)  # Format in the title and entries
+                footer_string = '\n'.join(footer_fo) % ('Gabriel Wagner & Lucas Nordmeyer')  # Format in the authors
 
                 # Concatenate the different parts of the html page
                 html_response = '{0}\n{1}\n{2}'.format(header_string, body_string, footer_string)
-
-		#In practice, go over the entries list,
-		#produce the boardcontents part,
-		#then construct the full page by combining all the parts ...
 
 		self.wfile.write(html_response)
 #------------------------------------------------------------------------------------------------------
@@ -215,20 +208,20 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             path_parts = self.path[1:].split('/')
             try:
                 base = path_parts[0]
-                # A post containing an ID (delete/modify)
                 if base == client_base_path[1:]:
                     if len(path_parts) > 1:
+                        # A post containing an ID (delete/modify)
                         entry_id = int(path_parts[1])
                         self.handle_user_entry(data, entry_id)
                     else:
                         self.handle_user_entry(data)
                 elif base == server_base_path[1:]:
                     if len(path_parts) > 1:
+                        # A post containing an ID (delete/modify)
                         entry_id = int(path_parts[1])
                         self.handle_entry(data,  entry_id)
                     else:
                         self.handle_entry(data)
-
             except IndexError:
                 print('Incorrect path formatting, should be /path/ID')
                 print('Your path was: {0}'.format(self.path))
@@ -242,22 +235,30 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 	# We might want some functions here as well
 #------------------------------------------------------------------------------------------------------
         def handle_user_entry(self, data, entry_id=None):
+            # Method for handling entry and retransmitting
+
+            # Handle the new data locally
             self.handle_entry(data, entry_id)
 
+            # Create the new path
             if entry_id is not None:
-                action = server_base_path + '/' + str(entry_id)
+                # Delete / Modify
+                path = server_base_path + '/' + str(entry_id)
             else:
-                action = server_base_path
+                # New entry
+                path = server_base_path
 
+            # Extract keys and values for retransmitting
             keys = list(data.keys())
             values = [data[key][0] for key in keys]
+
             # If we want to retransmit what we received to the other vessels
             retransmit = True # Like this, we will just create infinite loops!
             if retransmit:
                 # do_POST send the message only when the function finishes
                 # We must then create threads if we want to do some heavy computation
                 # Random content
-                thread = Thread(target=self.server.propagate_value_to_vessels,args=(action, action, keys, values) )
+                thread = Thread(target=self.server.propagate_value_to_vessels,args=(path, keys, values) )
                 # We kill the process if we kill the server
                 thread.daemon = True
                 # We start the thread
@@ -283,6 +284,11 @@ if __name__ == '__main__':
 
 	## read the templates from the corresponding html files
 	# .....
+	# Open the html files
+        header_fo = list(open(board_frontpage_header_template, 'r'))
+        body_fo = list(open(boardcontents_template, 'r'))
+        footer_fo = list(open(board_frontpage_footer_template, 'r'))
+
 
 	vessel_list = []
 	vessel_id = 0
