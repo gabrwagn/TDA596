@@ -245,7 +245,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             self.handle_entry(data)
 
             if entry_id is not None:
-                action = server_base_path + '/' + entry_id
+                action = server_base_path + '/' + str(entry_id)
             else:
                 action = server_base_path
 
@@ -268,10 +268,13 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             if 'delete' in keys and entry_id != None:
                 delete_flag = data['delete'][0]
                 if delete_flag == '1':
+                    print('Deleting value at: {0}'.format(entry_id))
                     self.server.delete_value_in_store(entry_id)
                 else:
+                    print('Modifying value at {0}'.format(entry_id))
                     self.server.modify_value_in_store(entry_id, data['entry'][0])
             else:
+                print('Adding value!)
                 self.server.add_value_to_store(data['entry'][0])
 #------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------
