@@ -274,7 +274,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                     print('Modifying value at {0}'.format(entry_id))
                     self.server.modify_value_in_store(entry_id, data['entry'][0])
             else:
-                print('Adding value!)
+                print('Adding value!')
                 self.server.add_value_to_store(data['entry'][0])
 #------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------
