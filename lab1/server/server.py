@@ -219,12 +219,12 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 entry_id = int(path_parts[1])
                 if base == client_base_path[1:]:
                     if len(path_parts) > 1:
-                        self.handle_user_entry(entry_id, data)
+                        self.handle_user_entry(data, entry_id)
                     else:
                         self.handle_user_entry(data)
                 elif base == server_base_path[1:]:
                     if len(path_parts) > 1:
-                        self.handle_entry(entry_id, data)
+                        self.handle_entry(data,  entry_id)
                     else:
                         self.handle_entry(data)
 
@@ -240,7 +240,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 #------------------------------------------------------------------------------------------------------
 	# We might want some functions here as well
 #------------------------------------------------------------------------------------------------------
-        def handle_user_entry(self, entry_id=None, data):
+        def handle_user_entry(self, data, entry_id=None):
             self.handle_entry(data)
 
             action = '/relay/{0}'.format(entry_id)
@@ -258,7 +258,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 # We start the thread
                 thread.start()
 
-        def handle_entry(self, entry_id=None, data):
+        def handle_entry(self, data, entry_id=None):
             keys = list(data.keys())
             if 'delete' in keys and entry_id != None:
                 delete_flag = data['delete'][0]
