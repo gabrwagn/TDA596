@@ -128,8 +128,7 @@ class BlackboardServer(HTTPServer):
         data["startingNode"] = self.vessel_id
         # Tell the next node to do election
         self.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, data)
-
-     def get_next_vessel():
+    def get_next_vessel():
         1 if self.server.vessel_id == len(self.server.vessels) else vessel_id + 1
 #------------------------------------------------------------------------------------------------------
 
