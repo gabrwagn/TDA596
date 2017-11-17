@@ -125,7 +125,7 @@ class BlackboardServer(HTTPServer):
         print "Vessel: %s is starting election" % self.vessel_id
         data = {}
         # We are starting the leader election process
-        data["max"] = random.rantint(1,11)
+        data["max"] = random.randint(1,11)
         data["leader"] = self.vessel_id
         data["startingNode"] = self.vessel_id
         # Tell the next node to do election
