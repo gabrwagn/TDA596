@@ -56,7 +56,12 @@ class BlackboardServer(HTTPServer):
         self.vessel_id = vessel_id
         # The list of other vessels
         self.vessels = vessel_list
-        self.start_leader_election()
+        # Start a thread to elect a leader
+        thread = Thread(target=self.start_leader_election,args=())
+        # We kill the process if we kill the server
+        thread.daemon = True
+        # We start the thread
+        thread.start()
 #------------------------------------------------------------------------------------------------------
     # We add a value received to the store
     def add_value_to_store(self, value):
