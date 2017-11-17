@@ -55,6 +55,7 @@ class BlackboardServer(HTTPServer):
         self.vessel_id = vessel_id
         # The list of other vessels
         self.vessels = vessel_list
+        self.start_leader_election()
 #------------------------------------------------------------------------------------------------------
     # We add a value received to the store
     def add_value_to_store(self, value):
@@ -311,6 +312,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
 
     def do_set_leader(self, data):
+        print('setting leader....')
         if leader != data["leader"]:
             leader = data["leader"] # this will make it a string
             self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, data)
@@ -329,7 +331,6 @@ if __name__ == '__main__':
     # .....
     # Open the html files
     folder = os.path.join(os.getcwd(), "")
-    print(folder)
     header_fo = list(open(folder + board_frontpage_header_template, 'r'))
     body_fo = list(open(folder + boardcontents_template, 'r'))
     footer_fo = list(open(folder + board_frontpage_footer_template, 'r'))
