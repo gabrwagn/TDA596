@@ -95,9 +95,10 @@ class BlackboardServer(HTTPServer):
 			# If we receive a HTTP 200 - OK
 			if status == 200:
 				success = True
-                print('Success on sending post to: {0}'.format(vessel))
+                #print('Success on sending post to: {0}'.format(vessel))
             else:
-                print('Something went wrong contacting: {0}'.format(vessel))
+				pass
+                #print('Something went wrong contacting: {0}'.format(vessel))
 		# We catch every possible exceptions
 		except Exception as e:
 			print "Error while contacting %s" % vessel
