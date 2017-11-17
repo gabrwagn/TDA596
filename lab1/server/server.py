@@ -328,7 +328,7 @@ if __name__ == '__main__':
     ## read the templates from the corresponding html files
     # .....
     # Open the html files
-    folder = os.path.join(os.getcwd(), 'server', "")
+    folder = os.path.join(os.getcwd(), "")
     print(folder)
     header_fo = list(open(folder + board_frontpage_header_template, 'r'))
     body_fo = list(open(folder + boardcontents_template, 'r'))
