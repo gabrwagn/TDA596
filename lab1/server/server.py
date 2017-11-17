@@ -245,9 +245,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 else:
                     self.handle_entry(data)
             # Leader election path is "/elect"
-            elif base == leader_election_path:
+            elif base == leader_election_path[1:]:
                 self.do_leader_election(data)
-            elif base == leader_selection_path:
+            elif base == leader_selection_path[1:]:
                 self.do_set_leader(data)
         except IndexError:
             print('Incorrect path formatting, should be /path/ID')
