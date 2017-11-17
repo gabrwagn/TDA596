@@ -58,17 +58,17 @@ class BlackboardServer(HTTPServer):
 #------------------------------------------------------------------------------------------------------
 	# We add a value received to the store
 	def add_value_to_store(self, value):
-                self.current_key += 1
-                self.store[self.current_key] = value
+		self.current_key += 1
+		self.store[self.current_key] = value
 #------------------------------------------------------------------------------------------------------
 	# We modify a value received in the store
 	def modify_value_in_store(self,key,value):
-                self.store[key] = value
+		self.store[key] = value
 #------------------------------------------------------------------------------------------------------
 	# We delete a value received from the store
 	def delete_value_in_store(self,key):
-            if key in self.store:
-                del self.store[key]
+		if key in self.store:
+			del self.store[key]
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
 	def contact_vessel(self, vessel, path, data):
@@ -167,25 +167,25 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 		# We set the response status code to 200 (OK)
 		self.set_HTTP_headers(200)
 
-                # Build board title
-                board_title = 'Blackboard {0}'.format(self.server.vessel_id)
+		# Build board title
+		board_title = 'Blackboard {0}'.format(self.server.vessel_id)
 
-                # Build message entries
-                entry_fo = list(open(entry_template, 'r'))
-                entry_template_string = '\n'.join(entry_fo)
-                entries_string = ''
-                for key in self.server.store:
-                    path = client_base_path + '/' + str(key)
-                    entry = entry_template_string % (path, key, self.server.store[key]) + '\n'
-                    entries_string += entry
+		# Build message entries
+		entry_fo = list(open(entry_template, 'r'))
+		entry_template_string = '\n'.join(entry_fo)
+		entries_string = ''
+		for key in self.server.store:
+			path = client_base_path + '/' + str(key)
+			entry = entry_template_string % (path, key, self.server.store[key]) + '\n'
+			entries_string += entry
 
-                # Turn the lines into strings (necessary to make the html work)
-                header_string = '\n'.join(header_fo)
-                body_string = '\n'.join(body_fo) % (board_title, entries_string)  # Format in the title and entries
-                footer_string = '\n'.join(footer_fo) % ('Gabriel Wagner & Lucas Nordmeyer')  # Format in the authors
+		# Turn the lines into strings (necessary to make the html work)
+		header_string = '\n'.join(header_fo)
+		body_string = '\n'.join(body_fo) % (board_title, entries_string)  # Format in the title and entries
+		footer_string = '\n'.join(footer_fo) % ('Gabriel Wagner & Lucas Nordmeyer')  # Format in the authors
 
-                # Concatenate the different parts of the html page
-                html_response = '{0}\n{1}\n{2}'.format(header_string, body_string, footer_string)
+		# Concatenate the different parts of the html page
+		html_response = '{0}\n{1}\n{2}'.format(header_string, body_string, footer_string)
 
 		self.wfile.write(html_response)
 #------------------------------------------------------------------------------------------------------
