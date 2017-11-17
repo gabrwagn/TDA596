@@ -15,6 +15,7 @@ from urllib import urlencode # Encode POST content into the HTTP header
 from codecs import open # Open a file
 from threading import  Thread # Thread Management
 import random
+import time
 #------------------------------------------------------------------------------------------------------
 
 import os
