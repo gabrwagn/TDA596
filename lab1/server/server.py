@@ -116,6 +116,21 @@ class BlackboardServer(HTTPServer):
                 # A good practice would be to try again if the request failed
                 # Here, we do it only once
                 self.contact_vessel(vessel, path, data)
+
+    def start_leader_election(self):
+        # Sleep so that all other nodes are up and running to receive requests
+        time.sleep(1)
+        print "Vessel: %s is starting election" % self.server.vessel_id
+        data = {}
+        # We are starting the leader election process
+        data["max"] = random.rantint(1,11)
+        data["leader"] = self.vessel_id
+        data["startingNode"] = self.vessel_id
+        # Tell the next node to do election
+        self.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, data)
+
+     def get_next_vessel():
+        1 if self.server.vessel_id == len(self.server.vessels) else vessel_id + 1
 #------------------------------------------------------------------------------------------------------
 
 
@@ -295,18 +310,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 data["leader"] = self.server.vessel_id
             self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, data)
 
-    def start_leader_election(self):
-        # Sleep so that all other nodes are up and running to receive requests
-        time.sleep(1)
-        print "Vessel: %s is starting election" % self.server.vessel_id
-        data = {}
-        # We are starting the leader election process
-        data["max"] = random.rantint(1,11)
-        data["leader"] = self.server.vessel_id
-        data["startingNode"] = self.server.vessel_id
-        # Tell the next node to do election
-        self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, data)
-
 
     def do_set_leader(self, data):
         if leader != data["leader"]:
@@ -346,9 +349,9 @@ if __name__ == '__main__':
     # We launch a server
     server = BlackboardServer(('', PORT_NUMBER), BlackboardRequestHandler, vessel_id, vessel_list)
     print("Starting the server on port %d" % PORT_NUMBER)
-    thread = Thread(target=self.start_leader_election,args=({}))
-    thread.daemon = True
-    thread.start()
+    #thread = Thread(target=self.start_leader_election,args=({}))
+    #thread.daemon = True
+    #thread.start()
 
     try:
         server.serve_forever()
