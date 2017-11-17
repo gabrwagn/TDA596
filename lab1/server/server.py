@@ -80,6 +80,8 @@ class BlackboardServer(HTTPServer):
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
     def contact_vessel(self, vessel, path, data):
+        print "printing data >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+        print data
         # the Boolean variable we will return
         success = False
 
@@ -307,26 +309,26 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # data = {"max":"%d","leader":"%s","startingNode":"%s"}
         # At this point all nodes have generated a random value and election process is over, time to set leader
 
-        print "election in progress..."
-        print data["startingNode"]
+        print "election in progress...[0]"
+        print data["startingNode"][0]
     
-        if data["startingNode"] == self.server.vessel_id:
-            print "should be setting leader to %s" % data["leader"]
+        if data["startingNode"][0] == self.server.vessel_id:
+            print "should be setting leader to %s" % data["leader"][0]
             self.do_set_leader(data)
 
         # Keep electing
         else:
             my_num = random.randint(1,11)
-            if my_num > data["max"]:
-                data["max"] = my_num
-                data["leader"] = self.server.vessel_id
+            if my_num > data["max"][0]:
+                data["max"][0] = my_num
+                data["leader"][0] = self.server.vessel_id
             self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, data)
 
 
     def do_set_leader(self, data):
         print('setting leader....')
-        if leader != data["leader"]:
-            leader = data["leader"] # this will make it a string
+        if leader != data["leader"][0]:
+            leader = data["leader"][0] # this will make it a string
             self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, data)
         # If we already have the correct leader then we do not need to send the message to the 
         # next vessel because they also have the same leader
