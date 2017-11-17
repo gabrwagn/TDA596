@@ -122,7 +122,7 @@ class BlackboardServer(HTTPServer):
     def start_leader_election(self):
         # Sleep so that all other nodes are up and running to receive requests
         time.sleep(1)
-        print "Vessel: %s is starting election" % self.server.vessel_id
+        print "Vessel: %s is starting election" % self.vessel_id
         data = {}
         # We are starting the leader election process
         data["max"] = random.rantint(1,11)
