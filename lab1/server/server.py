@@ -327,14 +327,14 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             if my_num > data["max"][0]:
                 data["max"][0] = my_num
                 data["leader"][0] = self.server.vessel_id
-            self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, reformat_data(data))
+            self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, self.reformat_data(data))
 
 
     def do_set_leader(self, data):
         print('setting leader....')
         if leader != data["leader"][0]:
             leader = data["leader"][0] # this will make it a string
-            self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, reformat_data(data))
+            self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, self.reformat_data(data))
         # If we already have the correct leader then we do not need to send the message to the 
         # next vessel because they also have the same leader
         return
