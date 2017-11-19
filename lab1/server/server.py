@@ -313,10 +313,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # Assuming we format the data as something like the following
         # data = {"max":"%d","leader":"%s","startingNode":"%s"}
         # At this point all nodes have generated a random value and election process is over, time to set leader
-
-        print "election in progress...[0]"
-        print data["startingNode"][0]
-    
         if data["startingNode"][0] == self.server.vessel_id:
             print "should be setting leader to %s" % data["leader"][0]
             self.do_set_leader()
@@ -327,7 +323,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             if my_num > data["max"][0]:
                 data["max"][0] = my_num
                 data["leader"][0] = self.server.vessel_id
-            self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, self.reformat_data(data))
+                self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, self.reformat_data(data))
+            else:
+                self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, self.reformat_data(data))
 
 
     def do_set_leader(self, data):
