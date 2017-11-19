@@ -314,7 +314,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # Assuming we format the data as something like the following
         # data = {"max":"%d","leader":"%s","startingNode":"%s"}
         # At this point all nodes have generated a random value and election process is over, time to set leader
-
+        print "Now comparing startingNode: %s to self: %s" % (data["startingNode"][0], self.server.vessel_id)
         if data["startingNode"][0] == self.server.vessel_id: # comparing strings
             print "should be setting leader to %s" % data["leader"][0]
             self.do_set_leader(data)
@@ -323,7 +323,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         else:
             print "Generating Random number.........................."
             my_num = random.randint(1,11)
-            if my_num > data["max"][0]:
+            if my_num >= data["max"][0]:
 
                 print "new leader is in place"
                 data["max"][0] = my_num
