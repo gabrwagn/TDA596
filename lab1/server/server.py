@@ -226,7 +226,8 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # and set the headers for the client
 
         data = self.parse_POST_request()
-
+        print data
+        print "This is in do_POST >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
         # Path should be /base/ID
         path_parts = self.path[1:].split('/')
         try:
