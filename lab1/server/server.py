@@ -317,7 +317,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         print "Now comparing startingNode: %s to self: %s" % (data["startingNode"][0], self.server.vessel_id)
         print data["startingNode"][0]
         print self.server.vessel_id
-        if data["startingNode"][0] == self.server.vessel_id: # comparing strings
+        if str(data["startingNode"][0]) == str(self.server.vessel_id): # comparing strings
             print "should be setting leader to %s" % data["leader"][0]
             self.do_set_leader(data)
 
