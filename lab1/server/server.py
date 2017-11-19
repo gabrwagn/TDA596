@@ -134,8 +134,10 @@ class BlackboardServer(HTTPServer):
         data = {}
         # We are starting the leader election process
         data["max"] = random.randint(1,11)
-        data["leader"] = int(self.vessel_id)
-        data["startingNode"] = int(self.vessel_id)
+        data["leader"] = self.vessel_id # this is a string
+        data["startingNode"] = self.vessel_id # this is a string
+
+        print "starting election with max: %s, leader: %s, and startingNode: %s" % (str(data["max"]), self.vessel_id,self.vessel_id )
         # Tell the next node to do election
         self.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, data)
 
@@ -313,14 +315,17 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # data = {"max":"%d","leader":"%s","startingNode":"%s"}
         # At this point all nodes have generated a random value and election process is over, time to set leader
 
-        if int(data["startingNode"][0]) == int(self.server.vessel_id):
+        if data["startingNode"][0] == self.server.vessel_id: # comparing strings
             print "should be setting leader to %s" % data["leader"][0]
             self.do_set_leader(data)
 
         # Keep electing
         else:
+            print "Generating Random number.........................."
             my_num = random.randint(1,11)
             if my_num > data["max"][0]:
+
+                print "new leader is in place"
                 data["max"][0] = my_num
                 data["leader"][0] = self.server.vessel_id
                 self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, self.reformat_data(data))
@@ -334,7 +339,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # If we already have the correct leader then we do not need to send the message to the 
         # next vessel because they also have the same leader, thus the if statment
         if leader != data["leader"][0]:
-            leader = data["leader"][0] # this will make it a int
+            leader = data["leader"][0] # this will make it a string
             self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, self.reformat_data(data))
         
         return
