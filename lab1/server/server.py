@@ -325,8 +325,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         else:
             print "Generating Random number.........................."
             my_num = random.randint(1,11)
-            if my_num >= data["max"][0]:
-
+            if my_num >= int(data["max"][0]):
                 print "new leader is in place"
                 data["max"][0] = my_num
                 data["leader"][0] = self.server.vessel_id
