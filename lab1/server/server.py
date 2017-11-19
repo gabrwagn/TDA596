@@ -313,7 +313,8 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # Assuming we format the data as something like the following
         # data = {"max":"%d","leader":"%s","startingNode":"%s"}
         # At this point all nodes have generated a random value and election process is over, time to set leader
-        if data["startingNode"][0] == self.server.vessel_id:
+
+        if int(data["startingNode"][0]) == int(self.server.vessel_id):
             print "should be setting leader to %s" % data["leader"][0]
             self.do_set_leader()
 
