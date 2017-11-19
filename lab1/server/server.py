@@ -138,6 +138,7 @@ class BlackboardServer(HTTPServer):
         data["startingNode"] = self.vessel_id
         # Tell the next node to do election
         self.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, data)
+
     def get_next_vessel(self):
         return 1 if self.vessel_id == len(self.vessels) else vessel_id + 1
 #------------------------------------------------------------------------------------------------------
@@ -171,6 +172,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # We need to parse the response, so we must know the length of the content
         length = int(self.headers['Content-Length'])
         # we can now parse the content using parse_qs
+
+        # According to the python docs, this function will return a dict with a key as key and 
+        # values as lists for some reason. 
         post_data = parse_qs(self.rfile.read(length), keep_blank_values=1)
         # we return the data
         return post_data
@@ -315,7 +319,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
     
         if data["startingNode"][0] == self.server.vessel_id:
             print "should be setting leader to %s" % data["leader"][0]
-            self.do_set_leader(data)
+            self.do_set_leader()
 
         # Keep electing
         else:
@@ -323,14 +327,14 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             if my_num > data["max"][0]:
                 data["max"][0] = my_num
                 data["leader"][0] = self.server.vessel_id
-            self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, data)
+            self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, reformat_data(data))
 
 
     def do_set_leader(self, data):
         print('setting leader....')
         if leader != data["leader"][0]:
             leader = data["leader"][0] # this will make it a string
-            self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, data)
+            self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, reformat_data(data))
         # If we already have the correct leader then we do not need to send the message to the 
         # next vessel because they also have the same leader
         return
@@ -338,6 +342,12 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
     def get_next_vessel(self):
         return 1 if self.server.vessel_id == len(self.server.vessels) else vessel_id + 1
 #------------------------------------------------------------------------------------------------------
+
+    def reformat_data(self, data):
+        return_dict = {}
+        for key in data:
+            return_dict[key] = data[key][0]
+        return return_dict
 #------------------------------------------------------------------------------------------------------
 # Execute the code
 if __name__ == '__main__':
