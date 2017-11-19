@@ -331,6 +331,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
     def do_set_leader(self, data):
         print('setting leader....')
+        global leader
         if leader != data["leader"][0]:
             leader = data["leader"][0] # this will make it a string
             self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, self.reformat_data(data))
