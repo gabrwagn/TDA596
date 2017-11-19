@@ -56,13 +56,14 @@ class BlackboardServer(HTTPServer):
         self.vessel_id = vessel_id
         # The list of other vessels
         self.vessels = vessel_list
+       
         # Start a thread to elect a leader
-        if self.vessel_id == 1:
-            thread = Thread(target=self.start_leader_election,args=())
-            # We kill the process if we kill the server
-            thread.daemon = True
-            # We start the thread
-            thread.start()
+        # We let every node start a leader election during the start up
+        thread = Thread(target=self.start_leader_election,args=())
+        # We kill the process if we kill the server
+        thread.daemon = True
+        # We start the thread
+        thread.start()
 #------------------------------------------------------------------------------------------------------
     # We add a value received to the store
     def add_value_to_store(self, value):
@@ -80,8 +81,6 @@ class BlackboardServer(HTTPServer):
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
     def contact_vessel(self, vessel, path, data):
-        print "printing data >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-        print data
         # the Boolean variable we will return
         success = False
 
@@ -230,8 +229,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # and set the headers for the client
 
         data = self.parse_POST_request()
-        print data
-        print "This is in do_POST >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+
         # Path should be /base/ID
         path_parts = self.path[1:].split('/')
         try:
@@ -330,13 +328,14 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
 
     def do_set_leader(self, data):
-        print('setting leader....')
+        print('setting leader to %s' % data["leader"])
         global leader
-        if leader != data["leader"][0]:
-            leader = data["leader"][0] # this will make it a string
-            self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, self.reformat_data(data))
         # If we already have the correct leader then we do not need to send the message to the 
-        # next vessel because they also have the same leader
+        # next vessel because they also have the same leader, thus the if statment
+        if leader != data["leader"][0]:
+            leader = data["leader"][0] # this will make it a int
+            self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, self.reformat_data(data))
+        
         return
     
     def get_next_vessel(self):
