@@ -134,8 +134,8 @@ class BlackboardServer(HTTPServer):
         data = {}
         # We are starting the leader election process
         data["max"] = random.randint(1,11)
-        data["leader"] = self.vessel_id
-        data["startingNode"] = self.vessel_id
+        data["leader"] = int(self.vessel_id)
+        data["startingNode"] = int(self.vessel_id)
         # Tell the next node to do election
         self.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, data)
 
@@ -316,7 +316,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
         if int(data["startingNode"][0]) == int(self.server.vessel_id):
             print "should be setting leader to %s" % data["leader"][0]
-            self.do_set_leader()
+            self.do_set_leader(data)
 
         # Keep electing
         else:
