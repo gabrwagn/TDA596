@@ -194,11 +194,16 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 # GET logic - specific path
 #------------------------------------------------------------------------------------------------------
     def do_GET_Index(self):
+        global leader
         # We set the response status code to 200 (OK)
         self.set_HTTP_headers(200)
 
         # Build board title
-        board_title = 'Blackboard {0}'.format(self.server.vessel_id)
+        board_title = ""
+        if (leader != None) and (leader != self.server.vessel_id):
+            board_title = "Blackboard: %s connected to Leader: %s" % (self.server.vessel_id, leader)
+        else:
+            board_title = 'Blackboard: {0}'.format(self.server.vessel_id)
 
         # Build message entries
         entry_fo = list(open(entry_template, 'r'))
@@ -320,14 +325,11 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         if int(data["contributingNodes"][0]) == len(self.server.vessels): # comparing strings
             print "should be setting leader to %s" % data["leader"][0]
             self.do_set_leader(data)
-
         # Keep electing
         else:
-            print "Generating Random number.........................."
             data["contributingNodes"][0] = int(data["contributingNodes"][0]) + 1
             my_num = random.randint(1,11)
             if my_num >= int(data["max"][0]):
-                print "new leader is in place"
                 data["max"][0] = my_num
                 data["leader"][0] = self.server.vessel_id
             self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, self.reformat_data(data))
