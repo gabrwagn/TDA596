@@ -136,6 +136,7 @@ class BlackboardServer(HTTPServer):
         data["max"] = random.randint(1,11)
         data["leader"] = self.vessel_id # this is a string
         data["startingNode"] = self.vessel_id # this is a string
+        data["contributingNodes"] = 1
 
         print "starting election with max: %s, leader: %s, and startingNode: %s" % (str(data["max"]), self.vessel_id,self.vessel_id )
         # Tell the next node to do election
@@ -314,24 +315,23 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # Assuming we format the data as something like the following
         # data = {"max":"%d","leader":"%s","startingNode":"%s"}
         # At this point all nodes have generated a random value and election process is over, time to set leader
-        print "Now comparing startingNode: %s to self: %s" % (data["startingNode"][0], self.server.vessel_id)
-        print data["startingNode"][0]
+        
+        # We check to see if we have 10 "votes" for a leader
         print self.server.vessel_id
-        if str(data["startingNode"][0]) == str(self.server.vessel_id): # comparing strings
+        if data["contributingNodes"][0] == len(self.server.vessel_list): # comparing strings
             print "should be setting leader to %s" % data["leader"][0]
             self.do_set_leader(data)
 
         # Keep electing
         else:
             print "Generating Random number.........................."
+            data["contributingNodes"][0] += 1
             my_num = random.randint(1,11)
             if my_num >= int(data["max"][0]):
                 print "new leader is in place"
                 data["max"][0] = my_num
                 data["leader"][0] = self.server.vessel_id
-                self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, self.reformat_data(data))
-            else:
-                self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, self.reformat_data(data))
+            self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, self.reformat_data(data))
 
 
     def do_set_leader(self, data):
