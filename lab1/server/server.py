@@ -317,14 +317,14 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         
         # We check to see if we have 10 "votes" for a leader
         print self.server.vessel_id
-        if data["contributingNodes"][0] == len(self.server.vessels): # comparing strings
+        if int(data["contributingNodes"][0]) == len(self.server.vessels): # comparing strings
             print "should be setting leader to %s" % data["leader"][0]
             self.do_set_leader(data)
 
         # Keep electing
         else:
             print "Generating Random number.........................."
-            data["contributingNodes"][0] += 1
+            data["contributingNodes"][0] = int(data["contributingNodes"][0]) + 1
             my_num = random.randint(1,11)
             if my_num >= int(data["max"][0]):
                 print "new leader is in place"
