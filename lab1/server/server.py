@@ -135,7 +135,6 @@ class BlackboardServer(HTTPServer):
         # We are starting the leader election process
         data["max"] = random.randint(1,11)
         data["leader"] = self.vessel_id # this is a string
-        data["startingNode"] = self.vessel_id # this is a string
         data["contributingNodes"] = 1
 
         print "starting election with max: %s, leader: %s, and startingNode: %s" % (str(data["max"]), self.vessel_id,self.vessel_id )
@@ -313,7 +312,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
     def do_leader_election(self, data):
         # Assuming we format the data as something like the following
-        # data = {"max":"%d","leader":"%s","startingNode":"%s"}
+        # data = {"max":"%d","leader":"%s","contributingNodes":"%s"}
         # At this point all nodes have generated a random value and election process is over, time to set leader
         
         # We check to see if we have 10 "votes" for a leader
