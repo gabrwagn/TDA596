@@ -317,7 +317,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         
         # We check to see if we have 10 "votes" for a leader
         print self.server.vessel_id
-        if data["contributingNodes"][0] == len(self.server.vessel_list): # comparing strings
+        if data["contributingNodes"][0] == len(self.server.vessels): # comparing strings
             print "should be setting leader to %s" % data["leader"][0]
             self.do_set_leader(data)
 
