@@ -199,11 +199,11 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         self.set_HTTP_headers(200)
 
         # Build board title
-        board_title = ""
-        if (leader != None) and (leader != self.server.vessel_id):
-            board_title = "Blackboard: %s connected to Leader: %s" % (self.server.vessel_id, leader)
-        else:
-            board_title = 'Blackboard: {0}'.format(self.server.vessel_id)
+        #board_title = ""
+        #if (leader is not None) and (leader != self.server.vessel_id):
+            #board_title = "Blackboard: %s connected to Leader: %s" % (self.server.vessel_id, leader)
+        #else:
+        board_title = 'Blackboard: {0}'.format(self.server.vessel_id)
 
         # Build message entries
         entry_fo = list(open(entry_template, 'r'))
