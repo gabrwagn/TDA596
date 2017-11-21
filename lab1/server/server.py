@@ -83,8 +83,9 @@ class BlackboardServer(HTTPServer):
 
     # We need to update our dictionary to be the same as the leaders
     def update_store(self, data):
-        self.store = data
-
+        self.store = sorted(data.items())
+        print "Our nodes dict is >>>>>>>>>>>><<<<<<<<<<<<<<<<<<<"
+        print self.store
     def get_store(self):
         return self.store
 
