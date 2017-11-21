@@ -255,6 +255,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             base = path_parts[0]
             # client_base_path is "/board"
             if base == client_base_path[1:]:
+                print "WE ARE RECEIVING THE POST IN THE LEADER SERVER>>>>>>>>>>>>>>>>>>>>>>>>>>"
                 if len(path_parts) > 1:
                     # A post containing an ID (delete/modify)
                     entry_id = int(path_parts[1])
@@ -299,13 +300,14 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             # Handle the new data locally
             self.handle_entry(data, entry_id)
 
+            # We might not need this if statement
             # Create the new path
             if entry_id is not None:
                 # Delete / Modify
-                path = server_base_path + '/' + str(entry_id)
+                path = server_update_board_path + '/' + str(entry_id)
             else:
                 # New entry
-                path = server_base_path
+                path = server_update_board_path
 
             # If we want to retransmit what we received to the other vessels
             retransmit = True # Like this, we will just create infinite loops!
@@ -315,7 +317,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 
                 # Get the board to send to the non-leaders
                 centralized_store = self.server.get_store()
-                thread = Thread(target=self.server.propagate_value_to_vessels,args=(path, centralized_store))
+                thread = Thread(target=self.server.propagate_value_to_vessels,args=(server_update_board_path, centralized_store))
                 # We kill the process if we kill the server
                 thread.daemon = True
                 # We start the thread
