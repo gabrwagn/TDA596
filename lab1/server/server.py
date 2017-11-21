@@ -294,7 +294,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # If we are the leader, we handle the POST as usual but if we send the data differently
         # to all the other clients, we will send a new dict for them to display, that way we
         # keep the global ordering consistent.
-        if leader == self.server.vessel_id:
+        if str(leader) == str(self.server.vessel_id):
             # Method for handling entry and retransmitting
             # Handle the new data locally
             self.handle_entry(data, entry_id)
