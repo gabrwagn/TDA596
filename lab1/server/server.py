@@ -33,6 +33,7 @@ PORT_NUMBER = 80
 # Added global variables
 client_base_path = '/board'
 server_base_path = '/relay'
+server_update_board_path = '/update' # this will be the endpoint to tell the non-leader servers that a update occured
 leader_election_path = '/elect'
 leader_selection_path = '/setleader'
 leader = None
@@ -79,6 +80,14 @@ class BlackboardServer(HTTPServer):
     def delete_value_in_store(self,key):
         if key in self.store:
             del self.store[key]
+
+    # We need to update our dictionary to be the same as the leaders
+    def update_store(self, data):
+        self.store = data
+
+    def get_store(self, data):
+        return self.store
+
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
     def contact_vessel(self, vessel, path, data):
@@ -263,6 +272,8 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 self.do_leader_election(data)
             elif base == leader_selection_path[1:]:
                 self.do_set_leader(data)
+            elif base == server_update_board_path[1:]:
+                self.update_board(data)
         except IndexError:
             print('Incorrect path formatting, should be /path/ID')
             print('Your path was: {0}'.format(self.path))
@@ -276,30 +287,41 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
     # We might want some functions here as well
 #------------------------------------------------------------------------------------------------------
     def handle_user_entry(self, data, entry_id=None):
-        # Method for handling entry and retransmitting
+        global leader
 
-        # Handle the new data locally
-        self.handle_entry(data, entry_id)
+        # If we are the leader, we handle the POST as usual but if we send the data differently
+        # to all the other clients, we will send a new dict for them to display, that way we
+        # keep the global ordering consistent.
+        if leader == self.server.vessel_id:
+            # Method for handling entry and retransmitting
+            # Handle the new data locally
+            self.handle_entry(data, entry_id)
 
-        # Create the new path
-        if entry_id is not None:
-            # Delete / Modify
-            path = server_base_path + '/' + str(entry_id)
+            # Create the new path
+            if entry_id is not None:
+                # Delete / Modify
+                path = server_base_path + '/' + str(entry_id)
+            else:
+                # New entry
+                path = server_base_path
+
+            # If we want to retransmit what we received to the other vessels
+            retransmit = True # Like this, we will just create infinite loops!
+            if retransmit:
+                # do_POST send the message only when the function finishes
+                # We must then create threads if we want to do some heavy computation
+                
+                # Get the board to send to the non-leaders
+                centralized_store = self.server.get_store()
+                thread = Thread(target=self.server.propagate_value_to_vessels,args=(path, centralized_store))
+                # We kill the process if we kill the server
+                thread.daemon = True
+                # We start the thread
+                thread.start()
+        # Otherwise we pass the POST to the leader
         else:
-            # New entry
-            path = server_base_path
+            self.server.contact_vessel("10.1.0.%d" % leader, client_base_path, self.reformat_data(data))
 
-        # If we want to retransmit what we received to the other vessels
-        retransmit = True # Like this, we will just create infinite loops!
-        if retransmit:
-            # do_POST send the message only when the function finishes
-            # We must then create threads if we want to do some heavy computation
-            # Random content
-            thread = Thread(target=self.server.propagate_value_to_vessels,args=(path, data) )
-            # We kill the process if we kill the server
-            thread.daemon = True
-            # We start the thread
-            thread.start()
 
     def handle_entry(self, data, entry_id=None):
         keys = list(data.keys())
@@ -314,6 +336,13 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         else:
             print('Adding value!')
             self.server.add_value_to_store(data['entry'][0])
+
+    # We have received a POST from the leader that there was an update to the board so we will now
+    # set our local board to show the centralized version of the board
+    def update_board(self, data):
+        data = self.reformat_data(data)
+        self.server.update_board(data) # Dict is not ordered so I have no idea how this will be ordered in GUI
+
 
     def do_leader_election(self, data):
         # Assuming we format the data as something like the following
