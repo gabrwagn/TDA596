@@ -320,7 +320,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 thread.start()
         # Otherwise we pass the POST to the leader
         else:
-            self.server.contact_vessel("10.1.0.%d" % leader, client_base_path, self.reformat_data(data))
+            self.server.contact_vessel("10.1.0.%s" % leader, client_base_path, self.reformat_data(data))
 
 
     def handle_entry(self, data, entry_id=None):
