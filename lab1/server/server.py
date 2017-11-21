@@ -132,9 +132,11 @@ class BlackboardServer(HTTPServer):
         for vessel in self.vessels:
             # We should not send it to our own IP, or we would create an infinite loop of updates
             if vessel != ("10.1.0.%s" % self.vessel_id):
-                # A good practice would be to try again if the request failed
-                # Here, we do it only once
-                self.contact_vessel(vessel, path, data)
+                # We do not want to send to the leader again
+                if leader != self.vessel_id:
+                    # A good practice would be to try again if the request failed
+                    # Here, we do it only once
+                    self.contact_vessel(vessel, path, data)
 
     def start_leader_election(self):
         # Sleep so that all other nodes are up and running to receive requests
