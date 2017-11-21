@@ -150,7 +150,9 @@ class BlackboardServer(HTTPServer):
 
     def start_leader_election(self):
         # Sleep so that all other nodes are up and running to receive requests
-        time.sleep(1)
+        sleep_time = random.randint(1,1000)
+        sleep_time = sleep_time / 1000.0
+        time.sleep(1 + sleep_time)
         print "Vessel: %s is starting election" % self.vessel_id
         data = {}
         # We are starting the leader election process
