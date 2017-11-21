@@ -59,18 +59,13 @@ class BlackboardServer(HTTPServer):
         self.vessels = vessel_list
        
         # Start a thread to elect a leader
-        # We let every node start a leader election during the start up
-        # if self.vessel_id == 1:
-        #     thread = Thread(target=self.start_leader_election,args=())
-        #     # We kill the process if we kill the server
-        #     thread.daemon = True
-        #     # We start the thread
-        #     thread.start()
-        thread = Thread(target=self.start_leader_election,args=())
-        # We kill the process if we kill the server
-        thread.daemon = True
-        # We start the thread
-        thread.start()
+        # We let node 1 start a leader election during the start up
+        if self.vessel_id == 1:
+            thread = Thread(target=self.start_leader_election,args=())
+            # We kill the process if we kill the server
+            thread.daemon = True
+            # We start the thread
+            thread.start()
 #------------------------------------------------------------------------------------------------------
     # We add a value received to the store
     def add_value_to_store(self, value):
@@ -93,8 +88,6 @@ class BlackboardServer(HTTPServer):
         keys = sorted(data.keys())
         for key in keys:
             self.store[int(key)] = data[key]
-        print "Our nodes dict is >>>>>>>>>>>><<<<<<<<<<<<<<<<<<<"
-        print self.store
     def get_store(self):
         return self.store
 
@@ -150,17 +143,12 @@ class BlackboardServer(HTTPServer):
 
     def start_leader_election(self):
         # Sleep so that all other nodes are up and running to receive requests
-        sleep_time = random.randint(1,1000)
-        sleep_time = sleep_time / 1000.0
-        time.sleep(1 + sleep_time)
-        print "Vessel: %s is starting election" % self.vessel_id
+        time.sleep(1)
         data = {}
         # We are starting the leader election process
         data["max"] = random.randint(1,11)
         data["leader"] = self.vessel_id # this is a string
         data["contributingNodes"] = 1
-
-        print "starting election with max: %s, leader: %s, and startingNode: %s" % (str(data["max"]), self.vessel_id,self.vessel_id )
         # Tell the next node to do election
         self.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, data)
 
@@ -269,7 +257,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             # client_base_path is "/board"
             if base == client_base_path[1:]:
                 if len(path_parts) > 1:
-                    print "at least we made it here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                     # A post containing an ID (delete/modify)
                     entry_id = int(path_parts[1])
                     self.handle_user_entry(data, entry_id)
@@ -322,11 +309,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             if retransmit:
                 # do_POST send the message only when the function finishes
                 # We must then create threads if we want to do some heavy computation
-                
+
                 # Get the board to send to the non-leaders
                 centralized_store = self.server.get_store()
-                print "THE LEADERS STORE IS NOW AS FOLLOWS: <<<<<<<<<<<<<<<<<<"
-                print centralized_store
                 thread = Thread(target=self.server.propagate_value_to_vessels,args=(server_update_board_path, centralized_store))
                 # We kill the process if we kill the server
                 thread.daemon = True
@@ -338,7 +323,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 path = client_base_path + '/' + str(entry_id) # Delete / Modify
             else:
                 path = client_base_path # New entry
-            print "WE ARE NOW RELAYING THE POST TO THE LEADER>>>>>>>>>>>>>>>>>>>>>>>>>"
             self.server.contact_vessel("10.1.0.%s" % leader, path, self.reformat_data(data))
 
 
@@ -369,9 +353,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # At this point all nodes have generated a random value and election process is over, time to set leader
         
         # We check to see if we have 10 "votes" for a leader
-        print self.server.vessel_id
         if int(data["contributingNodes"][0]) == len(self.server.vessels): # comparing strings
-            print "should be setting leader to %s" % data["leader"][0]
             self.do_set_leader(data)
         # Keep electing
         else:
