@@ -347,7 +347,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
     # set our local board to show the centralized version of the board
     def update_board(self, data):
         data = self.reformat_data(data)
-        self.server.update_board(data) # Dict is not ordered so I have no idea how this will be ordered in GUI
+        self.server.update_store(data) # Dict is not ordered so I have no idea how this will be ordered in GUI
 
 
     def do_leader_election(self, data):
