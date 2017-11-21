@@ -222,7 +222,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         entries_string = ''
         for key in self.server.store:
             path = client_base_path + '/' + str(key)
-            entry = entry_template_string % (path, key, self.server.store[key]) + '\n'
+            entry = entry_template_string % (path, int(key), self.server.store[key]) + '\n'
             entries_string += entry
 
         # Turn the lines into strings (necessary to make the html work)
