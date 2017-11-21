@@ -85,7 +85,7 @@ class BlackboardServer(HTTPServer):
     def update_store(self, data):
         self.store = data
 
-    def get_store(self, data):
+    def get_store(self):
         return self.store
 
 #------------------------------------------------------------------------------------------------------
