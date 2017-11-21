@@ -299,6 +299,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # If we are the leader, we handle the POST as usual but if we send the data differently
         # to all the other clients, we will send a new dict for them to display, that way we
         # keep the global ordering consistent.
+
         if str(leader) == str(self.server.vessel_id):
             # Method for handling entry and retransmitting
             # Handle the new data locally
@@ -306,12 +307,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
             # We might not need this if statement
             # Create the new path
-            if entry_id is not None:
-                # Delete / Modify
-                path = server_update_board_path + '/' + str(entry_id)
-            else:
-                # New entry
-                path = server_update_board_path
 
             # If we want to retransmit what we received to the other vessels
             retransmit = True # Like this, we will just create infinite loops!
@@ -330,8 +325,12 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 thread.start()
         # Otherwise we pass the POST to the leader
         else:
+            if entry_id is not None:
+                path = server_update_board_path + '/' + str(entry_id) # Delete / Modify
+            else:
+                path = server_update_board_path # New entry
             print "WE ARE NOW RELAYING THE POST TO THE LEADER>>>>>>>>>>>>>>>>>>>>>>>>>"
-            self.server.contact_vessel("10.1.0.%s" % leader, client_base_path, self.reformat_data(data))
+            self.server.contact_vessel("10.1.0.%s" % leader, path, self.reformat_data(data))
 
 
     def handle_entry(self, data, entry_id=None):
