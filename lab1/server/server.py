@@ -255,7 +255,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             base = path_parts[0]
             # client_base_path is "/board"
             if base == client_base_path[1:]:
-                print "WE ARE RECEIVING THE POST IN THE LEADER SERVER>>>>>>>>>>>>>>>>>>>>>>>>>>"
                 if len(path_parts) > 1:
                     # A post containing an ID (delete/modify)
                     entry_id = int(path_parts[1])
@@ -317,6 +316,8 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 
                 # Get the board to send to the non-leaders
                 centralized_store = self.server.get_store()
+                print "THE LEADERS STORE IS NOW AS FOLLOWS: <<<<<<<<<<<<<<<<<<"
+                print centralized_store
                 thread = Thread(target=self.server.propagate_value_to_vessels,args=(server_update_board_path, centralized_store))
                 # We kill the process if we kill the server
                 thread.daemon = True
@@ -324,6 +325,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 thread.start()
         # Otherwise we pass the POST to the leader
         else:
+            print "WE ARE NOW RELAYING THE POST TO THE LEADER>>>>>>>>>>>>>>>>>>>>>>>>>"
             self.server.contact_vessel("10.1.0.%s" % leader, client_base_path, self.reformat_data(data))
 
 
