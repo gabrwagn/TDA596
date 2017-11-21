@@ -83,11 +83,11 @@ class BlackboardServer(HTTPServer):
 
     # We need to update our dictionary to be the same as the leaders
     def update_store(self, data):
-        keys = data.keys()
         self.store = {}
         # Manually sorting the store
-        for key in sorted(keys):
-            self.store[key] = data[key]
+        keys = sorted(data.keys())
+        for key in keys:
+            self.store[int(key)] = data[key]
         print "Our nodes dict is >>>>>>>>>>>><<<<<<<<<<<<<<<<<<<"
         print self.store
     def get_store(self):
