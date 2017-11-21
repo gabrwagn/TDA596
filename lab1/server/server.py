@@ -328,9 +328,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # Otherwise we pass the POST to the leader
         else:
             if entry_id is not None:
-                path = server_update_board_path + '/' + str(entry_id) # Delete / Modify
+                path = client_base_path + '/' + str(entry_id) # Delete / Modify
             else:
-                path = server_update_board_path # New entry
+                path = client_base_path # New entry
             print "WE ARE NOW RELAYING THE POST TO THE LEADER>>>>>>>>>>>>>>>>>>>>>>>>>"
             self.server.contact_vessel("10.1.0.%s" % leader, path, self.reformat_data(data))
 
