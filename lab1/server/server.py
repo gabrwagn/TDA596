@@ -261,6 +261,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             # client_base_path is "/board"
             if base == client_base_path[1:]:
                 if len(path_parts) > 1:
+                    print "at least we made it here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                     # A post containing an ID (delete/modify)
                     entry_id = int(path_parts[1])
                     self.handle_user_entry(data, entry_id)
@@ -271,7 +272,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 if len(path_parts) > 1:
                     # A post containing an ID (delete/modify)
                     entry_id = int(path_parts[1])
-                    self.handle_entry(data,  entry_id)
+                    self.handle_entry(data, entry_id)
                 else:
                     self.handle_entry(data)
             # Leader election path is "/elect"
