@@ -256,6 +256,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
         # Path should be /base/ID
         path_parts = self.path[1:].split('/')
+        print path_parts
         try:
             base = path_parts[0]
             # client_base_path is "/board"
