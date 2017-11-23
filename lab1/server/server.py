@@ -353,7 +353,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # We check to see if we have 10 "votes" for a leader
         print data
         if int(data["contributingNodes"][0]) == len(self.server.vessels):
-            data = data ["flight"][0] = 1
+            data["flight"][0] = 1
             self.do_set_leader(data)
         # Keep electing
         else:
