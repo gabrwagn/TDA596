@@ -353,6 +353,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # We check to see if we have 10 "votes" for a leader
         print data
         if int(data["contributingNodes"][0]) == len(self.server.vessels):
+            data = data ["flight"][0] = 1
             self.do_set_leader(data)
         # Keep electing
         else:
@@ -369,8 +370,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         global leader
         # If we already have the correct leader then we do not need to send the message to the 
         # next vessel because they also have the same leader, thus the if statment
-        if leader != data["leader"][0]:
+        if leader != data["leader"][0] and (data["flight"][0] =< len(self.server.vessels)):
             leader = data["leader"][0] # this will make it a string
+            data["flight"][0] = int(data["flight"][0] + 1)
             self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, self.reformat_data(data))
         
         return
