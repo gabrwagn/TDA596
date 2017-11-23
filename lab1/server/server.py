@@ -37,7 +37,6 @@ server_update_board_path = '/update' # this will be the endpoint to tell the non
 leader_election_path = '/elect'
 leader_selection_path = '/setleader'
 leader = None
-leader_set = 0
 #------------------------------------------------------------------------------------------------------
 
 
@@ -61,7 +60,8 @@ class BlackboardServer(HTTPServer):
        
         # Start a thread to elect a leader
         # We let node 1 start a leader election during the start up
-        if self.vessel_id % 2 == 0:
+        self.random_number = random.randint(1,1000)
+        if self.vessel_id == 1:
             thread = Thread(target=self.start_leader_election,args=())
             # We kill the process if we kill the server
             thread.daemon = True
@@ -147,7 +147,7 @@ class BlackboardServer(HTTPServer):
         time.sleep(1)
         data = {}
         # We are starting the leader election process
-        data["max"] = random.randint(1,11)
+        data["max"] = random.randint(1,10000)
         data["leader"] = self.vessel_id # this is a string
         data["contributingNodes"] = 1
         # Tell the next node to do election
@@ -352,30 +352,29 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # At this point all nodes have generated a random value and election process is over, time to set leader
         
         # We check to see if we have 10 "votes" for a leader
-        print data
         if int(data["contributingNodes"][0]) == len(self.server.vessels):
-            self.do_set_leader(data,1)
+            self.do_set_leader(data)
         # Keep electing
         else:
             data["contributingNodes"][0] = int(data["contributingNodes"][0]) + 1
-            my_num = random.randint(1,11)
-            if my_num >= int(data["max"][0]):
-                data["max"][0] = my_num
+
+            if self.server.random_number == data["max"][0]:
+                if int(self.server.vessel_id) > int(data["leader"][0]):
+                    data["leader"][0] = self.server.vessel_id
+            elif self.server.random_number > int(data["max"][0]):
+                data["max"][0] = self.server.random_number
                 data["leader"][0] = self.server.vessel_id
             self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, self.reformat_data(data))
 
-    # If the extra param own is default None, then we know that we are receiving a messesage to send leader,
-    # and that this function wasn't called from internal code
-    def do_set_leader(self, data, own=None):
+    def do_set_leader(self, data):
         print('setting leader to %s' % data["leader"])
         global leader
         # If we already have the correct leader then we do not need to send the message to the 
         # next vessel because they also have the same leader, thus the if statment
         #if leader != data["leader"][0]:
-        if leader == None and own == None:
+        if leader == None:
             leader = data["leader"][0] # this will make it a string
             self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, self.reformat_data(data))
-        
         return
 
 #------------------------------------------------------------------------------------------------------
