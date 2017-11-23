@@ -318,10 +318,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 thread.start()
         # Otherwise we pass the POST to the leader
         else:
+            path = client_base_path # New entry
             if entry_id is not None:
-                path = client_base_path + '/' + str(entry_id) # Delete / Modify
-            else:
-                path = client_base_path # New entry
+                path = client_base_path + '/' + str(entry_id) # Delete / Modify                
             self.server.contact_vessel("10.1.0.%s" % leader, path, self.reformat_data(data))
 
 
@@ -374,10 +373,11 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, self.reformat_data(data))
         
         return
-    
+
+#------------------------------------------------------------------------------------------------------
+# Some helpful functions  
     def get_next_vessel(self):
         return 1 if self.server.vessel_id == len(self.server.vessels) else vessel_id + 1
-#------------------------------------------------------------------------------------------------------
 
     def reformat_data(self, data):
         return_dict = {}
