@@ -375,7 +375,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         #if leader != data["leader"][0]:
         if leader == None:
             leader = data["leader"][0] # this will make it a string
-            leaders_random_number = data["max"]
+            leaders_random_number = data["max"][0]
             self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, self.reformat_data(data))
         return
 
