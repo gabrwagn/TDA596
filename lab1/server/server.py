@@ -60,7 +60,7 @@ class BlackboardServer(HTTPServer):
        
         # Start a thread to elect a leader
         # We let node 1 start a leader election during the start up
-        if self.vessel_id == 1:
+        if self.vessel_id % 2 == 0:
             thread = Thread(target=self.start_leader_election,args=())
             # We kill the process if we kill the server
             thread.daemon = True
