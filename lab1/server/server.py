@@ -354,7 +354,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # We check to see if we have 10 "votes" for a leader
         print data
         if int(data["contributingNodes"][0]) == len(self.server.vessels):
-            self.do_set_leader(data)
+            self.do_set_leader(data,1)
         # Keep electing
         else:
             data["contributingNodes"][0] = int(data["contributingNodes"][0]) + 1
@@ -364,14 +364,15 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 data["leader"][0] = self.server.vessel_id
             self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_election_path, self.reformat_data(data))
 
-
-    def do_set_leader(self, data):
+    # If the extra param own is default None, then we know that we are receiving a messesage to send leader,
+    # and that this function wasn't called from internal code
+    def do_set_leader(self, data, own=None):
         print('setting leader to %s' % data["leader"])
         global leader
         # If we already have the correct leader then we do not need to send the message to the 
         # next vessel because they also have the same leader, thus the if statment
         #if leader != data["leader"][0]:
-        if leader == None:
+        if leader == None and own == None:
             leader = data["leader"][0] # this will make it a string
             self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, self.reformat_data(data))
         
