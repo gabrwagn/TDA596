@@ -356,8 +356,8 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             self.do_set_leader(data)
         # Keep electing
         else:
-            print "our random number is %d" % self.server.random_number
-            print "the max is %d" % data["max"][0]
+            print "our random number is %d" % int(self.server.random_number)
+            print "the max is %d" % int(data["max"][0])
             data["contributingNodes"][0] = int(data["contributingNodes"][0]) + 1
             if self.server.random_number == data["max"][0]:
                 if int(self.server.vessel_id) > int(data["leader"][0]):
