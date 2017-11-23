@@ -351,7 +351,8 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # At this point all nodes have generated a random value and election process is over, time to set leader
         
         # We check to see if we have 10 "votes" for a leader
-        if int(data["contributingNodes"][0]) == len(self.server.vessels): # comparing strings
+        print data
+        if int(data["contributingNodes"][0]) == len(self.server.vessels):
             self.do_set_leader(data)
         # Keep electing
         else:
