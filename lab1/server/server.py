@@ -61,12 +61,12 @@ class BlackboardServer(HTTPServer):
         # Start a thread to elect a leader
         # We let node 1 start a leader election during the start up
         self.random_number = random.randint(1,1000)
-        if self.vessel_id == 1:
-            thread = Thread(target=self.start_leader_election,args=())
-            # We kill the process if we kill the server
-            thread.daemon = True
-            # We start the thread
-            thread.start()
+        #if self.vessel_id == 1:
+        thread = Thread(target=self.start_leader_election,args=())
+        # We kill the process if we kill the server
+        thread.daemon = True
+        # We start the thread
+        thread.start()
 #------------------------------------------------------------------------------------------------------
     # We add a value received to the store
     def add_value_to_store(self, value):
