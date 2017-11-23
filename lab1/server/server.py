@@ -37,6 +37,7 @@ server_update_board_path = '/update' # this will be the endpoint to tell the non
 leader_election_path = '/elect'
 leader_selection_path = '/setleader'
 leader = None
+leaders_random_number = None
 #------------------------------------------------------------------------------------------------------
 
 
@@ -61,7 +62,8 @@ class BlackboardServer(HTTPServer):
         # Start a thread to elect a leader
         # We let node 1 start a leader election during the start up
         self.random_number = random.randint(1,1000)
-        if self.vessel_id % 2 == 0:
+        even_or_odd = random.randint(1,2)
+        if self.vessel_id % even_or_odd == 0:
             thread = Thread(target=self.start_leader_election,args=())
             # We kill the process if we kill the server
             thread.daemon = True
@@ -213,7 +215,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # Build board title
         board_title = ""
         if (leader is not None) and (leader != self.server.vessel_id):
-            board_title = "Blackboard: %s connected to Leader: %s" % (self.server.vessel_id, leader)
+            board_title = "Blackboard: %s connected to Leader: %s, leaders number: %s" % (self.server.vessel_id, leader,str(leaders_random_number))
         else:
             board_title = 'Blackboard: {0}'.format(self.server.vessel_id)
 
@@ -367,11 +369,13 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
     def do_set_leader(self, data):
         print('setting leader to %s' % data["leader"])
         global leader
+        global leaders_random_number
         # If we already have the correct leader then we do not need to send the message to the 
         # next vessel because they also have the same leader, thus the if statment
         #if leader != data["leader"][0]:
         if leader == None:
             leader = data["leader"][0] # this will make it a string
+            leaders_random_number = data["max"]
             self.server.contact_vessel("10.1.0.%d" % self.get_next_vessel(), leader_selection_path, self.reformat_data(data))
         return
 
