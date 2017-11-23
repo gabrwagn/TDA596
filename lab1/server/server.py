@@ -147,7 +147,7 @@ class BlackboardServer(HTTPServer):
         time.sleep(1)
         data = {}
         # We are starting the leader election process
-        data["max"] = random.randint(1,10000)
+        data["max"] = self.server.random_number
         data["leader"] = self.vessel_id # this is a string
         data["contributingNodes"] = 1
         # Tell the next node to do election
