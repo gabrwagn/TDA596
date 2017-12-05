@@ -287,9 +287,11 @@ if __name__ == '__main__':
 	## read the templates from the corresponding html files
 	# .....
 	# Open the html files
-	header_fo = list(open(board_frontpage_header_template, 'r'))
-	body_fo = list(open(boardcontents_template, 'r'))
-	footer_fo = list(open(board_frontpage_footer_template, 'r'))
+	# use ,"server" to run the lab1.py file 
+	folder = os.path.join(os.getcwd(), "")
+    header_fo = list(open(folder + board_frontpage_header_template, 'r'))
+    body_fo = list(open(folder + boardcontents_template, 'r'))
+    footer_fo = list(open(folder + board_frontpage_footer_template, 'r'))
 
 
 	vessel_list = []
