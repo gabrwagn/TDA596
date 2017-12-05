@@ -156,7 +156,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         board_title = 'Blackboard {0}'.format(self.server.vessel_id)
 
         # Build message entries
-        entry_fo = list(open(entry_template, 'r'))
+        entry_fo = list(open(os.path.join(os.getcwd(), "server", entry_template), 'r'))
         entry_template_string = '\n'.join(entry_fo)
         entries_string = ''
         for key in self.server.store:
