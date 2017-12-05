@@ -278,7 +278,7 @@ if __name__ == '__main__':
     # .....
     # Open the html files
     # use ,"server" to run the lab1.py file 
-    folder = os.path.join(os.getcwd(), "")
+    folder = os.path.join(os.getcwd(),"server", "")
     header_fo = list(open(folder + board_frontpage_header_template, 'r'))
     body_fo = list(open(folder + boardcontents_template, 'r'))
     footer_fo = list(open(folder + board_frontpage_footer_template, 'r'))
