@@ -273,8 +273,13 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         data['clock'] = new_clock
 
         # Handle the new data locally
-        self.handle_entry(data, path_info + [new_sender, new_clock])
-
+        if path_info is not None:
+            path_info_arg = path_info
+            path_info_arg.append(new_sender)
+            path_info_arg.append(new_clock)
+            self.handle_entry(data, path_info_arg)
+        else:
+            self.handle_entry(data)
         # Create the new path
         if path_info is not None:
             # Delete / Modify
