@@ -275,7 +275,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         if path_info is not None:
             # Delete / Modify
             sender = path_info[0]
-            clock = path_info[0]
+            clock = path_info[1]
             path = server_base_path + '/' + sender + '/' + clock
 
         else:
