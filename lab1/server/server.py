@@ -79,6 +79,8 @@ class BlackboardServer(HTTPServer):
         for element in self.store:
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
                 element['entry'] = data['entry'][0]
+                element['sender'] = path_info[2]
+                element['clock'] = = path_info[3]
 #------------------------------------------------------------------------------------------------------
     # We delete a value received from the store
     def delete_value_in_store(self, data, path_info):
@@ -265,18 +267,20 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
     def handle_user_entry(self, data, path_info=None):
         # Method for handling entry and retransmitting
 
-        data['sender'] = [str(self.server.vessel_id)]
-        data['clock'] = [str(self.server.clock)]
+        new_sender = [str(self.server.vessel_id)]
+        data['sender'] = new_sender
+        new_clock = [str(self.server.clock)]
+        data['clock'] = new_clock
 
         # Handle the new data locally
-        self.handle_entry(data, path_info)
+        self.handle_entry(data, path_info + [new_sender, new_clock])
 
         # Create the new path
         if path_info is not None:
             # Delete / Modify
             sender = path_info[0]
             clock = path_info[1]
-            path = server_base_path + '/' + sender + '/' + clock
+            path = server_base_path + '/' + sender + '/' + clock + '/' + new_sender + '/' + new_clock
 
         else:
             # New entry
