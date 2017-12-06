@@ -33,6 +33,13 @@ server_base_path = '/relay'
 #------------------------------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------------------------------
+
+# Store will look something like the following
+# A dictionary with the key as an integer and a value as a dictionary
+# in the value we will want to hold 1. the entry 2. the clock count 3. board who sent entry 
+# ex., [{'entry': 'hi','clock': 1, 'sender': 10}, {'entry': 'hello', 'clock': 1, 'sender': 5}]
+
+
 #------------------------------------------------------------------------------------------------------
 class BlackboardServer(HTTPServer):
 #------------------------------------------------------------------------------------------------------
@@ -40,27 +47,44 @@ class BlackboardServer(HTTPServer):
     # We call the super init
         HTTPServer.__init__(self,server_address, handler)
         # we create the dictionary of values
-        self.store = {}
+        self.store = []
         # We keep a variable of the next id to insert
         self.current_key = -1
         # our own ID (IP is 10.1.0.ID)
         self.vessel_id = vessel_id
         # The list of other vessels
         self.vessels = vessel_list
+		self.clock = 0
 #------------------------------------------------------------------------------------------------------
     # We add a value received to the store
-    def add_value_to_store(self, value):
+    def add_value_to_store(self, data):
         self.current_key += 1
-        self.store[self.current_key] = value
+		value = {}
+		value['entry'] = data['entry'][0]
+		value['clock'] = data['clock'][0]
+		value['sender'] = data['sender'][0]
+        self.store.append({self.current_key: value})
+        self.sort_store()
+
+	def sort_store(self):
+        # We sort the messages based on logical clock values first and if there is a tie, we use IP address
+        # The UI will later assign ids to these messages but the ids will hold no real significant values
+        # except to display which position the message is at.
+        self.store = sorted(self.store, key = lambda x: (x['clock'], x['sender']))
+		
 #------------------------------------------------------------------------------------------------------
     # We modify a value received in the store
-    def modify_value_in_store(self,key,value):
+    # TODO we need to change this function to take an index in and then we modify the message at that index
+    def modify_value_in_store(self, key, value):
         self.store[key] = value
+        self.sort_store()
 #------------------------------------------------------------------------------------------------------
     # We delete a value received from the store
-    def delete_value_in_store(self,key):
+    # TODO we need to change this function to take an index in and delete it at that index
+    def delete_value_in_store(self, key):
         if key in self.store:
             del self.store[key]
+        self.sort_store()
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
     def contact_vessel(self, vessel, path, data):
@@ -135,7 +159,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         post_data = parse_qs(self.rfile.read(length), keep_blank_values=1)
         # we return the data
         return post_data
-#------------------------------------------------------i-----------------------------------------------
+#-----------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------
 # Request handling - GET
 #------------------------------------------------------------------------------------------------------
@@ -221,6 +245,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
     def handle_user_entry(self, data, entry_id=None):
         # Method for handling entry and retransmitting
 
+		data['sender'] = self.server.vessel_id
+		data['clock'] = self.server.clock
+
         # Handle the new data locally
         self.handle_entry(data, entry_id)
 
@@ -231,10 +258,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         else:
             # New entry
             path = server_base_path
-
-        # Extract keys and values for retransmitting
-        keys = list(data.keys())
-        values = [data[key][0] for key in keys]
 
         # If we want to retransmit what we received to the other vessels
         retransmit = True # Like this, we will just create infinite loops!
@@ -250,6 +273,15 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
     def handle_entry(self, data, entry_id=None):
         keys = list(data.keys())
+
+		# We assume that every request has a clock value associated with it
+		# New message's clock is greater than ours
+		message_clock = int(data["clock"][0])
+		if self.server.clock < message_clock:
+			self.server.clock = message_clock + 1
+		else:
+			self.server.clock += 1
+        # Operate as usual
         if 'delete' in keys and entry_id is not None:
             delete_flag = data['delete'][0]
             if delete_flag == '1':
@@ -260,7 +292,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 self.server.modify_value_in_store(entry_id, data['entry'][0])
         else:
             print('Adding value!')
-            self.server.add_value_to_store(data['entry'][0])
+            self.server.add_value_to_store(data)
 
     def reformat_data(self, data):
         return_dict = {}
