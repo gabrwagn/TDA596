@@ -71,22 +71,21 @@ class BlackboardServer(HTTPServer):
         # The UI will later assign ids to these messages but the ids will hold no real significant values
         # except to display which position the message is at.
         self.store = sorted(self.store, key = lambda x: (x['clock'], x['sender']))
-        print "SORTING STORE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-        print self.store
         
 #------------------------------------------------------------------------------------------------------
     # We modify a value received in the store
-    # TODO we need to change this function to take an index in and then we modify the message at that index
-    def modify_value_in_store(self, key, value):
-        self.store[key] = value
-        self.sort_store()
+    def modify_value_in_store(self, data, path_info):
+        # Path_info is something like ['sender','clock']
+        for element in self.store:
+            if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
+                element['entry'] = data['entry'][0]
 #------------------------------------------------------------------------------------------------------
     # We delete a value received from the store
-    # TODO we need to change this function to take an index in and delete it at that index
-    def delete_value_in_store(self, key):
-        if key in self.store:
-            del self.store[key]
-        self.sort_store()
+    def delete_value_in_store(self, data, path_info):
+        # Path_info is something like ['sender','clock']
+        for element in self.store:
+            if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
+                self.store.remove(element)
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
     def contact_vessel(self, vessel, path, data):
@@ -187,7 +186,13 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         entries_string = ''
         count = 0
         for key in self.server.store:
-            path = client_base_path + '/' + str(count)
+
+            # Delete or modify needs to have more info in order to identify it
+            
+            sender = self.server.store[count]['sender']
+            clock = self.server.store[count]['clock']
+            # We will have the path be something like 'board/sender{0}/clock{1}
+            path = client_base_path + '/' + 'board/' + sender + '/' + clock
             entry = entry_template_string % (path, count, self.server.store[count]['entry']) + '\n'
             entries_string += entry
             count += 1
@@ -218,21 +223,24 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
         # Path should be /base/ID
         path_parts = self.path[1:].split('/')
-        print path_parts
         try:
             base = path_parts[0]
             if base == client_base_path[1:]:
+                # Local delete or modify
                 if len(path_parts) > 1:
                     # A post containing an ID (delete/modify)
-                    entry_id = int(path_parts[1])
-                    self.handle_user_entry(data, entry_id)
+                    path_info = path_parts[1:]
+                    # Assuming that the path was put together correctly and we have something like
+                    # board/sender/clock
+                    self.handle_user_entry(data, path_info)
                 else:
                     self.handle_user_entry(data)
             elif base == server_base_path[1:]:
+                # Incoming delete or modify
                 if len(path_parts) > 1:
                     # A post containing an ID (delete/modify)
-                    entry_id = int(path_parts[1])
-                    self.handle_entry(data,  entry_id)
+                    path_info = path_parts[1:]
+                    self.handle_entry(data, path_info)
                 else:
                     self.handle_entry(data)
         except IndexError:
@@ -247,19 +255,22 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 #------------------------------------------------------------------------------------------------------
     # We might want some functions here as well
 #------------------------------------------------------------------------------------------------------
-    def handle_user_entry(self, data, entry_id=None):
+    def handle_user_entry(self, data, path_info=None):
         # Method for handling entry and retransmitting
 
         data['sender'] = [str(self.server.vessel_id)]
         data['clock'] = [str(self.server.clock)]
 
         # Handle the new data locally
-        self.handle_entry(data, entry_id)
+        self.handle_entry(data, path_info)
 
         # Create the new path
-        if entry_id is not None:
+        if path_info is not None:
             # Delete / Modify
-            path = server_base_path + '/' + str(entry_id)
+            sender = data['sender'][0]
+            clock = data['clock'][0]
+            path = server_base_path + '/' + sender + clock
+
         else:
             # New entry
             path = server_base_path
@@ -269,14 +280,14 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         if retransmit:
             # do_POST send the message only when the function finishes
             # We must then create threads if we want to do some heavy computation
-            # Random content
+            
             thread = Thread(target=self.server.propagate_value_to_vessels,args=(path, self.reformat_data(data)))
             # We kill the process if we kill the server
             thread.daemon = True
             # We start the thread
             thread.start()
 
-    def handle_entry(self, data, entry_id=None):
+    def handle_entry(self, data, path_info=None):
         keys = list(data.keys())
 
         # We assume that every request has a clock value associated with it
@@ -288,14 +299,17 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         else:
             self.server.clock += 1
         # Operate as usual
-        if 'delete' in keys and entry_id is not None:
+        if 'delete' in keys and path_info is not None:
             delete_flag = data['delete'][0]
             if delete_flag == '1':
-                print('Deleting value at: {0}'.format(entry_id))
-                self.server.delete_value_in_store(entry_id)
+                print('Deleting value at: {0}'.format(path_info))
+                # Path_info is the information we need to delete the correct message in the local list
+                # Path_info is something like ['sender','clock']
+                self.server.delete_value_in_store(data, path_info)
             else:
-                print('Modifying value at {0}'.format(entry_id))
-                self.server.modify_value_in_store(entry_id, data['entry'][0])
+                print('Modifying value at {0}'.format(path_info))
+                
+                self.server.modify_value_in_store(data, path_info)
         else:
             print('Adding value!')
             self.server.add_value_to_store(data)
