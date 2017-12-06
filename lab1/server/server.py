@@ -269,10 +269,10 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
     def handle_user_entry(self, data, path_info=None):
         # Method for handling entry and retransmitting
 
-        new_sender = [str(self.server.vessel_id)]
-        data['sender'] = new_sender
-        new_clock = [str(self.server.clock)]
-        data['clock'] = new_clock
+        new_sender = str(self.server.vessel_id)
+        data['sender'] = [new_sender]
+        new_clock = str(self.server.clock)
+        data['clock'] = [new_clock]
 
         # Handle the new data locally
         if path_info is not None:
