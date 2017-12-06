@@ -247,8 +247,8 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
     def handle_user_entry(self, data, entry_id=None):
         # Method for handling entry and retransmitting
 
-        data['sender'] = self.server.vessel_id
-        data['clock'] = self.server.clock
+        data['sender'] = [self.server.vessel_id]
+        data['clock'] = [self.server.clock]
 
         # Handle the new data locally
         self.handle_entry(data, entry_id)
