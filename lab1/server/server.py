@@ -70,8 +70,9 @@ class BlackboardServer(HTTPServer):
         # We sort the messages based on logical clock values first and if there is a tie, we use IP address
         # The UI will later assign ids to these messages but the ids will hold no real significant values
         # except to display which position the message is at.
-        print self.store
         self.store = sorted(self.store, key = lambda x: (x['clock'], x['sender']))
+        print "SORTING STORE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+        print self.store
         
 #------------------------------------------------------------------------------------------------------
     # We modify a value received in the store
@@ -279,8 +280,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
         # We assume that every request has a clock value associated with it
         # New message's clock is greater than ours
-
-        print data
 
         message_clock = int(data["clock"][0])
         if self.server.clock < message_clock:
