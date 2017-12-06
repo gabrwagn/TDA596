@@ -54,24 +54,24 @@ class BlackboardServer(HTTPServer):
         self.vessel_id = vessel_id
         # The list of other vessels
         self.vessels = vessel_list
-		self.clock = 0
+        self.clock = 0
 #------------------------------------------------------------------------------------------------------
     # We add a value received to the store
     def add_value_to_store(self, data):
         self.current_key += 1
-		value = {}
-		value['entry'] = data['entry'][0]
-		value['clock'] = data['clock'][0]
-		value['sender'] = data['sender'][0]
+        value = {}
+        value['entry'] = data['entry'][0]
+        value['clock'] = data['clock'][0]
+        value['sender'] = data['sender'][0]
         self.store.append({self.current_key: value})
         self.sort_store()
 
-	def sort_store(self):
+    def sort_store(self):
         # We sort the messages based on logical clock values first and if there is a tie, we use IP address
         # The UI will later assign ids to these messages but the ids will hold no real significant values
         # except to display which position the message is at.
         self.store = sorted(self.store, key = lambda x: (x['clock'], x['sender']))
-		
+        
 #------------------------------------------------------------------------------------------------------
     # We modify a value received in the store
     # TODO we need to change this function to take an index in and then we modify the message at that index
@@ -245,8 +245,8 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
     def handle_user_entry(self, data, entry_id=None):
         # Method for handling entry and retransmitting
 
-		data['sender'] = self.server.vessel_id
-		data['clock'] = self.server.clock
+        data['sender'] = self.server.vessel_id
+        data['clock'] = self.server.clock
 
         # Handle the new data locally
         self.handle_entry(data, entry_id)
@@ -274,13 +274,13 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
     def handle_entry(self, data, entry_id=None):
         keys = list(data.keys())
 
-		# We assume that every request has a clock value associated with it
-		# New message's clock is greater than ours
-		message_clock = int(data["clock"][0])
-		if self.server.clock < message_clock:
-			self.server.clock = message_clock + 1
-		else:
-			self.server.clock += 1
+        # We assume that every request has a clock value associated with it
+        # New message's clock is greater than ours
+        message_clock = int(data["clock"][0])
+        if self.server.clock < message_clock:
+            self.server.clock = message_clock + 1
+        else:
+            self.server.clock += 1
         # Operate as usual
         if 'delete' in keys and entry_id is not None:
             delete_flag = data['delete'][0]
