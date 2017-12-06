@@ -77,7 +77,7 @@ class BlackboardServer(HTTPServer):
     def modify_value_in_store(self, data, path_info):
         # Path_info is something like ['sender','clock']
         for element in self.store:
-            if element['sender'] == path_info[1] and element['clock'] == path_info[2]:
+            if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
                 element['entry'] = data['entry'][0]
 #------------------------------------------------------------------------------------------------------
     # We delete a value received from the store
@@ -85,7 +85,7 @@ class BlackboardServer(HTTPServer):
         # Path_info is something like ['sender','clock']
         print path_info
         for element in self.store:
-            if element['sender'] == path_info[1] and element['clock'] == path_info[2]:
+            if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
                 self.store.remove(element)
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
@@ -193,7 +193,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             sender = self.server.store[count]['sender']
             clock = self.server.store[count]['clock']
             # We will have the path be something like 'board/sender{0}/clock{1}
-            path = client_base_path + '/' + 'board/' + sender + '/' + clock
+            path = client_base_path + '/' + sender + '/' + clock
             entry = entry_template_string % (path, count, self.server.store[count]['entry']) + '\n'
             entries_string += entry
             count += 1
