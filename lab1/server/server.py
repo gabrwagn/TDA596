@@ -63,7 +63,7 @@ class BlackboardServer(HTTPServer):
         value['entry'] = data['entry'][0]
         value['clock'] = data['clock'][0]
         value['sender'] = data['sender'][0]
-        self.store.append({self.current_key: value})
+        self.store.append(value)
         self.sort_store()
 
     def sort_store(self):
