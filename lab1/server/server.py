@@ -250,7 +250,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # Method for handling entry and retransmitting
 
         data['sender'] = [self.server.vessel_id]
-        data['clock'] = [self.server.clock]
+        data['clock'] = str([self.server.clock])
 
         # Handle the new data locally
         self.handle_entry(data, entry_id)
