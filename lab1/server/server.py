@@ -79,8 +79,10 @@ class BlackboardServer(HTTPServer):
         for element in self.store:
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
                 element['entry'] = data['entry'][0]
-                element['sender'] = path_info[2]
-                element['clock'] = path_info[3]
+                element['sender'] = str(path_info[2])
+                element['clock'] = str(path_info[3])
+
+        print self.store
 #------------------------------------------------------------------------------------------------------
     # We delete a value received from the store
     def delete_value_in_store(self, data, path_info):
