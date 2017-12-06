@@ -83,7 +83,6 @@ class BlackboardServer(HTTPServer):
     # We delete a value received from the store
     def delete_value_in_store(self, data, path_info):
         # Path_info is something like ['sender','clock']
-        print "WE NEED TO DELETE A VALUE>>>>>>>>>>>>>"
         print path_info
         for element in self.store:
             if element['sender'] == path_info[1] and element['clock'] == path_info[2]:
@@ -271,7 +270,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             # Delete / Modify
             sender = data['sender'][0]
             clock = data['clock'][0]
-            path = server_base_path + '/' + sender + clock
+            path = server_base_path + '/' + sender + '/' + clock
 
         else:
             # New entry
