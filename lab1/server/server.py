@@ -274,8 +274,8 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # Create the new path
         if path_info is not None:
             # Delete / Modify
-            sender = data['sender'][0]
-            clock = data['clock'][0]
+            sender = path_info[0]
+            clock = path_info[0]
             path = server_base_path + '/' + sender + '/' + clock
 
         else:
