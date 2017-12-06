@@ -278,6 +278,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
         # We assume that every request has a clock value associated with it
         # New message's clock is greater than ours
+
+        print data
+
         message_clock = int(data["clock"][0])
         if self.server.clock < message_clock:
             self.server.clock = message_clock + 1
