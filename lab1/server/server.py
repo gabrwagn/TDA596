@@ -183,10 +183,12 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         entry_fo = list(open(os.path.join(os.getcwd(), "server", entry_template), 'r'))
         entry_template_string = '\n'.join(entry_fo)
         entries_string = ''
+        count = 0
         for key in self.server.store:
-            path = client_base_path + '/' + str(key)
-            entry = entry_template_string % (path, key, self.server.store[key]) + '\n'
+            path = client_base_path + '/' + str(count)
+            entry = entry_template_string % (path, count, self.server.store[count]['entry']) + '\n'
             entries_string += entry
+            count += 1
 
         # Turn the lines into strings (necessary to make the html work)
         header_string = '\n'.join(header_fo)
