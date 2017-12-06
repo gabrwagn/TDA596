@@ -233,6 +233,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                     path_info = path_parts[1:]
                     # Assuming that the path was put together correctly and we have something like
                     # board/sender/clock
+
+                    print "PATH PARTS"
+                    print path_parts
                     self.handle_user_entry(data, path_info)
                 else:
                     self.handle_user_entry(data)
@@ -241,6 +244,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 if len(path_parts) > 1:
                     # A post containing an ID (delete/modify)
                     path_info = path_parts[1:]
+                    print "PATH PARTS"
+                    print path_parts
+                    
                     self.handle_entry(data, path_info)
                 else:
                     self.handle_entry(data)
