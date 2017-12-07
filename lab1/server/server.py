@@ -80,6 +80,8 @@ class BlackboardServer(HTTPServer):
     def modify_value_in_store(self, data, path_info):
         # Path_info is something like ['sender','clock', 'elclock' ,'new_sender', 'new_clock']
         print "WE SHOULD BE MODIFYING A VALUE>>>>>>>>>>>>>>>>>>"
+        print data
+        print '\n'
         for element in self.store:
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
                 # If the clock on the incoming request is lower than what we have, we have a newer value and
@@ -98,6 +100,7 @@ class BlackboardServer(HTTPServer):
                        # print "SETTING NEW ELEMENT CLOCK TO %s" % (str(int(path_info[2]) + 1))
 
         print self.store
+        print '\n'
 #------------------------------------------------------------------------------------------------------
     # We delete a value received from the store
     def delete_value_in_store(self, data, path_info):
