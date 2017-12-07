@@ -217,6 +217,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             sender = self.server.store[count]['sender']
             clock = self.server.store[count]['clock']
             elclock = self.server.store[count]['elclock']
+            print "WE ARE GETTING THE ELCLOCK AT %s" % self.server.store[count]['elclock']
             # We will have the path be something like 'board/sender{0}/clock{1}/elclock{2}
             path = client_base_path + '/' + sender + '/' + clock + '/' + elclock
             entry = entry_template_string % (path, count, self.server.store[count]['entry']) + '\n'
