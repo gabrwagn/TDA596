@@ -256,9 +256,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                     path_info = path_parts[1:]
                     # Assuming that the path was put together correctly and we have something like
                     # board/sender/clock/elclock
-                    print "OUR LOCAL PATH_INFO IS...................."
-                    print path_info
+                    
                     # We need to incriment the elclock
+                    path_info[2] = str(int(path_info[2]) + 1)
                     self.handle_user_entry(data, path_info)
                 else:
                     self.handle_user_entry(data)
