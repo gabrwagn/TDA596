@@ -79,9 +79,6 @@ class BlackboardServer(HTTPServer):
     # We modify a value received in the store
     def modify_value_in_store(self, data, path_info):
         # Path_info is something like ['sender','clock', 'elclock' ,'new_sender', 'new_clock']
-        print "WE SHOULD BE MODIFYING A VALUE>>>>>>>>>>>>>>>>>>"
-        print data
-        print '\n'
         for element in self.store:
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
                 # If the clock on the incoming request is lower than what we have, we have a newer value and
@@ -90,17 +87,17 @@ class BlackboardServer(HTTPServer):
                     element['entry'] = data['entry'][0]
                     element['modby'] = path_info[3]
                     element['elclock'] = path_info[2]
-                   #print "SETTING NEW ELEMENT CLOCK TO %s" % (str(int(path_info[2]) + 1))
                 elif int(path_info[2]) == int(element['elclock']):
+                    print "WE ARE ARRIVING AT A CONFLICT SO WE ARE AT A TIEBREAKER"
                     # Do the operation if the senders IP is lower
+                    print "SENDER: %s" % path_info[3]
+                    print "LAST MODBY: %s" % element['modby']
                     if path_info[3] < element['modby']:
                         element['entry'] = data['entry'][0]
                         element['modby'] = path_info[3]
                         element['elclock'] = path_info[2]
-                       # print "SETTING NEW ELEMENT CLOCK TO %s" % (str(int(path_info[2]) + 1))
 
         print self.store
-        print '\n'
 #------------------------------------------------------------------------------------------------------
     # We delete a value received from the store
     def delete_value_in_store(self, data, path_info):
@@ -220,7 +217,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             sender = self.server.store[count]['sender']
             clock = self.server.store[count]['clock']
             elclock = self.server.store[count]['elclock']
-            print "WE ARE GETTING THE ELCLOCK AT %s" % self.server.store[count]['elclock']
             # We will have the path be something like 'board/sender{0}/clock{1}/elclock{2}
             path = client_base_path + '/' + sender + '/' + clock + '/' + elclock
             entry = entry_template_string % (path, count, self.server.store[count]['entry']) + '\n'
@@ -250,8 +246,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # and set the headers for the client
 
         data = self.parse_POST_request()
-
-        print self.path
         path_parts = self.path[1:].split('/')
         try:
             base = path_parts[0]
@@ -272,8 +266,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 if len(path_parts) > 1:
                     # A post containing an ID (delete/modify)
                     path_info = path_parts[1:]
-                    print "PATH INFO __________________________"
-                    print path_info
                     path_info[2] = str(int(path_info[2]) + 1)
                     self.handle_entry(data, path_info)
                 else:
