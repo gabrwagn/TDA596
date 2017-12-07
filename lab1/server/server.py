@@ -79,6 +79,7 @@ class BlackboardServer(HTTPServer):
     # We modify a value received in the store
     def modify_value_in_store(self, data, path_info):
         # Path_info is something like ['sender','clock', 'elclock' ,'new_sender', 'new_clock']
+        print "WE SHOULD BE MODIFYING A VALUE>>>>>>>>>>>>>>>>>>"
         for element in self.store:
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
                 # If the clock on the incoming request is lower than what we have, we have a newer value and
@@ -99,7 +100,6 @@ class BlackboardServer(HTTPServer):
     # We delete a value received from the store
     def delete_value_in_store(self, data, path_info):
         # Path_info is something like ['sender','clock', 'elclock' ,'new_sender', 'new_clock']
-        print path_info
         for element in self.store:
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
                 self.store.remove(element)
@@ -256,9 +256,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                     path_info = path_parts[1:]
                     # Assuming that the path was put together correctly and we have something like
                     # board/sender/clock
-
-                    print "PATH PARTS"
-                    print path_parts
                     self.handle_user_entry(data, path_info)
                 else:
                     self.handle_user_entry(data)
@@ -267,8 +264,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 if len(path_parts) > 1:
                     # A post containing an ID (delete/modify)
                     path_info = path_parts[1:]
-                    print "PATH PARTS"
-                    print path_parts
                     
                     self.handle_entry(data, path_info)
                 else:
