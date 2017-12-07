@@ -97,7 +97,9 @@ class BlackboardServer(HTTPServer):
     # We delete a value received from the store
     def delete_value_in_store(self, data, path_info):
         # Path_info is something like ['sender','clock', 'elclock' ,'new_sender', 'new_clock']
+        print 'WE SHOULD BE DELETING SOMETHING'
         for element in self.store:
+            print element
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
                 if int(path_info[2]) > int(element['elclock']):
                     element['deleted'] = '1'
