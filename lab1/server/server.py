@@ -66,7 +66,12 @@ class BlackboardServer(HTTPServer):
         value['deleted'] = '0' # Tells us whether the message has been deleted, used to recover from tiebreaks
         value['elclock'] = '0' # The element clock is the number of accesses to this specific element
         value['modby'] = data['sender'][0] # Init to sender
-        self.store.append(value)
+        found = False
+        for element in self.store:
+            if element['sender'] == data['sender'][0] and element['clock'] == data['clock'][0]:
+                found = True
+        if value not found:
+            self.store.append(value)
         self.sort_store()
 
     def sort_store(self):
@@ -79,10 +84,12 @@ class BlackboardServer(HTTPServer):
     # We modify a value received in the store
     def modify_value_in_store(self, data, path_info):
         # Path_info is something like ['sender','clock', 'elclock' ,'new_sender', 'new_clock']
+        found = False
         for element in self.store:
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
                 # If the clock on the incoming request is lower than what we have, we have a newer value and
                 # we ignore the request
+                found = True
                 if int(path_info[2]) > int(element['elclock']):
                     element['entry'] = data['entry'][0]
                     element['modby'] = path_info[3]
@@ -93,20 +100,36 @@ class BlackboardServer(HTTPServer):
                         element['entry'] = data['entry'][0]
                         element['modby'] = path_info[3]
                         element['elclock'] = path_info[2]
+        if not found:
+            deleted_value = {}
+            deleted_value['sender'] = path_info[0]
+            deleted_value['clock'] = path_info[1]
+            deleted_value['deleted'] = '1'
+            deleted_value['entry'] = ''
+            deleted_value['modby'] = path_info[3]
+            self.store.append(deleted_value)
 #------------------------------------------------------------------------------------------------------
     # We delete a value received from the store
     def delete_value_in_store(self, data, path_info):
         # Path_info is something like ['sender','clock', 'elclock' ,'new_sender', 'new_clock']
-        print 'WE SHOULD BE DELETING SOMETHING'
+        found = False
         for element in self.store:
-            print element
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
+                found = True
                 if int(path_info[2]) >= int(element['elclock']):
                     element['deleted'] = '1'
                 elif int(path_info[2]) == int(element['elclock']):
                     # Do the operation if the senders IP is lower
                     if path_info[3] < element['modby']:
                         element['deleted'] = '1'
+        if not found:
+            deleted_value = {}
+            deleted_value['sender'] = path_info[0]
+            deleted_value['clock'] = path_info[1]
+            deleted_value['deleted'] = '1'
+            deleted_value['entry'] = ''
+            deleted_value['modby'] = path_info[3]
+            self.store.append(deleted_value)
 
 
     def get_element_clock(self, data, path_info):
@@ -340,13 +363,8 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             delete_flag = data['delete'][0]
             if delete_flag == '1':
                 print('Deleting value at: {0}'.format(path_info))
-                # Path_info is the information we need to delete the correct message in the local list
-                # Path_info is something like ['sender','clock']
                 self.server.delete_value_in_store(data, path_info)
             else:
-                #print('Modifying value at {0}'.format(path_info))
-                
-                # We need to make sure path_info has elclock as well
                 self.server.modify_value_in_store(data, path_info)
         else:
             print('Adding value!')
