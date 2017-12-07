@@ -70,7 +70,7 @@ class BlackboardServer(HTTPServer):
         for element in self.store:
             if element['sender'] == data['sender'][0] and element['clock'] == data['clock'][0]:
                 found = True
-        if value not found:
+        if not found:
             self.store.append(value)
         self.sort_store()
 
