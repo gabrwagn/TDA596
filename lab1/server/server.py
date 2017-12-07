@@ -84,11 +84,13 @@ class BlackboardServer(HTTPServer):
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
                 # If the clock on the incoming request is lower than what we have, we have a newer value and
                 # we ignore the request
-                if int(path_info[2]) > element['elclock']:
+                print "WE FOUND THE ELEMENT"
+                print ""
+                if int(path_info[2]) > int(element['elclock']):
                     element['entry'] = data['entry'][0]
                     element['modby'] = path_info[3]
                     element['elclock'] = str(int(path_info['elclock']) + 1)
-                elif int(path_info[2]) == element['elclock']:
+                elif int(path_info[2]) == int(element['elclock']):
                     # Do the operation if the senders IP is lower
                     if path_info[2] < element['modby']:
                         element['entry'] = data['entry'][0]
