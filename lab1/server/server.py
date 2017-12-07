@@ -79,6 +79,11 @@ class BlackboardServer(HTTPServer):
     # We modify a value received in the store
     def modify_value_in_store(self, data, path_info):
         # Path_info is something like ['sender','clock', 'elclock' ,'new_sender', 'new_clock']
+        print "Sender: %s" path_info[0]
+        print "Clock: %s" path_info[1]
+        print "Elclock: %s" path_info[2]
+        print "New_sender: %s" path_info[3]
+        print "New_clock: %s" path_info[4]
         for element in self.store:
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
                 # If the clock on the incoming request is lower than what we have, we have a newer value and
@@ -342,7 +347,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 # Path_info is something like ['sender','clock']
                 self.server.delete_value_in_store(data, path_info)
             else:
-                print('Modifying value at {0}'.format(path_info))
+                #print('Modifying value at {0}'.format(path_info))
                 
                 # We need to make sure path_info has elclock as well
                 self.server.modify_value_in_store(data, path_info)
