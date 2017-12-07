@@ -79,11 +79,6 @@ class BlackboardServer(HTTPServer):
     # We modify a value received in the store
     def modify_value_in_store(self, data, path_info):
         # Path_info is something like ['sender','clock', 'elclock' ,'new_sender', 'new_clock']
-        print "Sender: %s" % path_info[0]
-        print "Clock: %s" % path_info[1]
-        print "Elclock: %s" % path_info[2]
-        print "New_sender: %s" % path_info[3]
-        print "New_clock: %s" % path_info[4]
         for element in self.store:
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
                 # If the clock on the incoming request is lower than what we have, we have a newer value and
@@ -93,23 +88,23 @@ class BlackboardServer(HTTPServer):
                     element['modby'] = path_info[3]
                     element['elclock'] = path_info[2]
                 elif int(path_info[2]) == int(element['elclock']):
-                    print "WE ARE ARRIVING AT A CONFLICT SO WE ARE AT A TIEBREAKER"
                     # Do the operation if the senders IP is lower
-                    print "SENDER: %s" % path_info[3]
-                    print "LAST MODBY: %s" % element['modby']
                     if path_info[3] < element['modby']:
                         element['entry'] = data['entry'][0]
                         element['modby'] = path_info[3]
                         element['elclock'] = path_info[2]
-
-        print self.store
 #------------------------------------------------------------------------------------------------------
     # We delete a value received from the store
     def delete_value_in_store(self, data, path_info):
         # Path_info is something like ['sender','clock', 'elclock' ,'new_sender', 'new_clock']
         for element in self.store:
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
-                self.store.remove(element)
+                if int(path_info[2]) > int(element['elclock']):
+                    element['deleted'] = '1'
+                elif int(path_info[2]) == int(element['elclock']):
+                    # Do the operation if the senders IP is lower
+                    if path_info[3] < element['modby']:
+                        element['deleted'] = '1'
 
 
     def get_element_clock(self, data, path_info):
@@ -218,15 +213,15 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         for key in self.server.store:
 
             # Delete or modify needs to have more info in order to identify it
-            
-            sender = self.server.store[count]['sender']
-            clock = self.server.store[count]['clock']
-            elclock = self.server.store[count]['elclock']
-            # We will have the path be something like 'board/sender{0}/clock{1}/elclock{2}
-            path = client_base_path + '/' + sender + '/' + clock + '/' + elclock
-            entry = entry_template_string % (path, count, self.server.store[count]['entry']) + '\n'
-            entries_string += entry
-            count += 1
+            if self.server.store[count]['deleted'] != '1':
+                sender = self.server.store[count]['sender']
+                clock = self.server.store[count]['clock']
+                elclock = self.server.store[count]['elclock']
+                # We will have the path be something like 'board/sender{0}/clock{1}/elclock{2}
+                path = client_base_path + '/' + sender + '/' + clock + '/' + elclock
+                entry = entry_template_string % (path, count, self.server.store[count]['entry']) + '\n'
+                entries_string += entry
+                count += 1
 
         # Turn the lines into strings (necessary to make the html work)
         header_string = '\n'.join(header_fo)
