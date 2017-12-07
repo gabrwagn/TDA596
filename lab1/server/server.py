@@ -310,7 +310,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             print('Your ID was: {0}'.format(path_parts[1]))
         
 
-        if self.server.posts == 40:
+        if self.server.posts == 1600:
             print "Time to reach consistent blackboards: %d" % (time.time() - self.server.start_time)
         return
 #------------------------------------------------------------------------------------------------------
