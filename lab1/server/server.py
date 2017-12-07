@@ -312,7 +312,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             elclock = self.server.get_element_clock(data, path_info)
             sender = path_info[0]
             clock = path_info[1]
-            path = server_base_path + '/' + sender + '/' + clock + '/' + new_sender + '/' + new_clock + '/' + elclock
+            path = server_base_path + '/' + sender + '/' + clock + '/'  + elclock + '/' + new_sender + '/' + new_clock
 
         else:
             # New entry
