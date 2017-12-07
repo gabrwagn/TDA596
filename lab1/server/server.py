@@ -15,7 +15,7 @@ from urllib import urlencode # Encode POST content into the HTTP header
 from codecs import open # Open a file
 from threading import  Thread # Thread Management
 #------------------------------------------------------------------------------------------------------
-
+import time
 import os
 # Global variables for HTML templates
 board_frontpage_footer_template = 'board_frontpage_footer_template.html'
@@ -55,6 +55,8 @@ class BlackboardServer(HTTPServer):
         # The list of other vessels
         self.vessels = vessel_list
         self.clock = 0
+        self.posts = 0
+        self.start_time = None
 #------------------------------------------------------------------------------------------------------
     # We add a value received to the store
     def add_value_to_store(self, data):
@@ -269,6 +271,11 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # Here, we should check which path was requested and call the right logic based on it
         # We should also parse the data received
         # and set the headers for the client
+        
+        if self.server.posts == 0:
+            self.server.start_time = time.time()
+
+        self.server.posts += 1
 
         data = self.parse_POST_request()
         path_parts = self.path[1:].split('/')
@@ -301,6 +308,10 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         except ValueError:
             print('Wrong type of ID, should be integer')
             print('Your ID was: {0}'.format(path_parts[1]))
+        
+
+        if self.server.posts == 40:
+            print "Time to reach consistent blackboards: %d" % (time.time() - self.server.start_time)
         return
 #------------------------------------------------------------------------------------------------------
 # POST Logic
