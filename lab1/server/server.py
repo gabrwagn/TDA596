@@ -60,9 +60,12 @@ class BlackboardServer(HTTPServer):
     def add_value_to_store(self, data):
         self.current_key += 1
         value = {}
-        value['entry'] = data['entry'][0]
-        value['clock'] = data['clock'][0]
-        value['sender'] = data['sender'][0]
+        value['entry'] = data['entry'][0] # The message displayed on the board
+        value['clock'] = data['clock'][0] # The clock of the server who added the message
+        value['sender'] = data['sender'][0] # The server who sent the message (used for tiebreaks)
+        value['deleted'] = '0' # Tells us whether the message has been deleted, used to recover from tiebreaks
+        value['elclock'] = '0' # The element clock is the number of accesses to this specific element
+        value['modby'] = data['sender'][0] # Init to sender
         self.store.append(value)
         self.sort_store()
 
@@ -75,22 +78,37 @@ class BlackboardServer(HTTPServer):
 #------------------------------------------------------------------------------------------------------
     # We modify a value received in the store
     def modify_value_in_store(self, data, path_info):
-        # Path_info is something like ['sender','clock']
+        # Path_info is something like ['sender','clock', 'elclock' ,'new_sender', 'new_clock']
         for element in self.store:
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
-                element['entry'] = data['entry'][0]
-                element['sender'] = str(path_info[2])
-                element['clock'] = str(path_info[3])
+                # If the clock on the incoming request is lower than what we have, we have a newer value and
+                # we ignore the request
+                if int(path_info[2]) > element['elclock']:
+                    element['entry'] = data['entry'][0]
+                    element['modby'] = path_info[3]
+                    element['elclock'] = str(int(path_info['elclock']) + 1)
+                elif int(path_info[2]) == element['elclock']:
+                    # Do the operation if the senders IP is lower
+                    if path_info[2] < element['modby']:
+                        element['entry'] = data['entry'][0]
+                        element['modby'] = path_info[3]
+                        element['elclock'] = str(int(path_info['elclock']) + 1)
 
         print self.store
 #------------------------------------------------------------------------------------------------------
     # We delete a value received from the store
     def delete_value_in_store(self, data, path_info):
-        # Path_info is something like ['sender','clock']
+        # Path_info is something like ['sender','clock', 'elclock' ,'new_sender', 'new_clock']
         print path_info
         for element in self.store:
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
                 self.store.remove(element)
+
+
+    def get_element_clock(self, data, path_info):
+        for element in self.store:
+            if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
+                return element['elclock']
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
     def contact_vessel(self, vessel, path, data):
@@ -196,8 +214,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             
             sender = self.server.store[count]['sender']
             clock = self.server.store[count]['clock']
-            # We will have the path be something like 'board/sender{0}/clock{1}
-            path = client_base_path + '/' + sender + '/' + clock
+            elclock = self.server.store[count]['elclock']
+            # We will have the path be something like 'board/sender{0}/clock{1}/elclock{2}
+            path = client_base_path + '/' + sender + '/' + clock + '/' + elclock
             entry = entry_template_string % (path, count, self.server.store[count]['entry']) + '\n'
             entries_string += entry
             count += 1
@@ -285,9 +304,10 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # Create the new path
         if path_info is not None:
             # Delete / Modify
+            elclock = self.server.get_element_clock(data, path_info)
             sender = path_info[0]
             clock = path_info[1]
-            path = server_base_path + '/' + sender + '/' + clock + '/' + new_sender + '/' + new_clock
+            path = server_base_path + '/' + sender + '/' + clock + '/' + new_sender + '/' + new_clock + '/' + elclock
 
         else:
             # New entry
@@ -327,6 +347,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             else:
                 print('Modifying value at {0}'.format(path_info))
                 
+                # We need to make sure path_info has elclock as well
                 self.server.modify_value_in_store(data, path_info)
         else:
             print('Adding value!')
