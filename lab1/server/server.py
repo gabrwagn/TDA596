@@ -272,6 +272,8 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 if len(path_parts) > 1:
                     # A post containing an ID (delete/modify)
                     path_info = path_parts[1:]
+                    print "PATH INFO __________________________"
+                    print path_info
                     path_info[2] = str(int(path_info[2]) + 1)
                     self.handle_entry(data, path_info)
                 else:
