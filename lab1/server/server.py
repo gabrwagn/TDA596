@@ -251,7 +251,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
         data = self.parse_POST_request()
 
-        # Path should be /base/ID
+        print self.path
         path_parts = self.path[1:].split('/')
         try:
             base = path_parts[0]
