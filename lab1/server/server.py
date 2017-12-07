@@ -93,7 +93,7 @@ class BlackboardServer(HTTPServer):
                    #print "SETTING NEW ELEMENT CLOCK TO %s" % (str(int(path_info[2]) + 1))
                 elif int(path_info[2]) == int(element['elclock']):
                     # Do the operation if the senders IP is lower
-                    if path_info[2] < element['modby']:
+                    if path_info[3] < element['modby']:
                         element['entry'] = data['entry'][0]
                         element['modby'] = path_info[3]
                         element['elclock'] = path_info[2]
