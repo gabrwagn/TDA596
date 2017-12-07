@@ -101,7 +101,7 @@ class BlackboardServer(HTTPServer):
         for element in self.store:
             print element
             if element['sender'] == path_info[0] and element['clock'] == path_info[1]:
-                if int(path_info[2]) > int(element['elclock']):
+                if int(path_info[2]) >= int(element['elclock']):
                     element['deleted'] = '1'
                 elif int(path_info[2]) == int(element['elclock']):
                     # Do the operation if the senders IP is lower
