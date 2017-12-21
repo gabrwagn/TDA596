@@ -79,7 +79,7 @@ class Lab1():
 	# Open an xterm and launch a specific command
 	def startServer(self, server, nbOfServers):
 		# Call mininet.term.makeTerm
-		makeTerm(node=server, cmd="python lab4/lab4.py %s %d" % (server.IP().replace("10.1.0.",""), nbOfServers) )
+		makeTerm(node=server, cmd="python server/lab4.py %s %d" % (server.IP().replace("10.1.0.",""), nbOfServers) )
 #------------------------------------------------------------------------------------------------------
 	# run(self)
 	# Run the lab 1
