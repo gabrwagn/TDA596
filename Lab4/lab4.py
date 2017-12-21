@@ -17,10 +17,7 @@ from threading import  Thread # Thread Management
 #------------------------------------------------------------------------------------------------------
 
 # Global variables for HTML templates
-board_frontpage_footer_template = ""
-board_frontpage_header_template = ""
-boardcontents_template = ""
-entry_template = ""
+frontpage_template_fo = list(open("vote_frontpage_template.html", 'r'))
 
 #------------------------------------------------------------------------------------------------------
 # Static variables definitions
@@ -38,27 +35,21 @@ class BlackboardServer(HTTPServer):
 	# We call the super init
 		HTTPServer.__init__(self,server_address, handler)
 		# we create the dictionary of values
-		self.store = {}
-		# We keep a variable of the next id to insert
-		self.current_key = -1
+		self.vote_one_store = {}
+		self.vote_two_store = []
 		# our own ID (IP is 10.1.0.ID)
 		self.vessel_id = vessel_id
 		# The list of other vessels
 		self.vessels = vessel_list
 #------------------------------------------------------------------------------------------------------
-	# We add a value received to the store
-	def add_value_to_store(self, value):
+	# We add a value received to the vote one store
+	def add_vote(self, vote):
 		# We add the value to the store
 		pass
-#------------------------------------------------------------------------------------------------------
-	# We modify a value received in the store
-	def modify_value_in_store(self,key,value):
-		# we modify a value in the store if it exists
-		pass
-#------------------------------------------------------------------------------------------------------
-	# We delete a value received from the store
-	def delete_value_in_store(self,key):
-		# we delete a value in the store if it exists
+
+	# We add a value received to the vote two store
+	def add_result_vector(self, vector):
+		# We add the value to the store
 		pass
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
@@ -102,7 +93,7 @@ class BlackboardServer(HTTPServer):
 			if vessel != ("10.1.0.%s" % self.vessel_id):
 				# A good practice would be to try again if the request failed
 				# Here, we do it only once
-				self.contact_vessel(vessel, path, action, key, value)		
+				self.contact_vessel(vessel, path, action, key, value)
 #------------------------------------------------------------------------------------------------------
 
 
@@ -137,7 +128,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 		post_data = parse_qs(self.rfile.read(length), keep_blank_values=1)
 		# we return the data
 		return post_data
-#------------------------------------------------------------------------------------------------------	
+#------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------
 # Request handling - GET
 #------------------------------------------------------------------------------------------------------
@@ -154,11 +145,11 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 		# We set the response status code to 200 (OK)
 		self.set_HTTP_headers(200)
 		# We should do some real HTML here
-		html_reponse = "<html><head><title>Basic Skeleton</title></head><body>This is the basic HTML content when receiving a GET</body></html>"
-		#In practice, go over the entries list, 
-		#produce the boardcontents part, 
+		html_reponse = frontpage_template_fo
+		#In practice, go over the entries list,
+		#produce the boardcontents part,
 		#then construct the full page by combining all the parts ...
-		
+
 		self.wfile.write(html_reponse)
 #------------------------------------------------------------------------------------------------------
 	# we might want some other functions
@@ -172,12 +163,15 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 		# We should also parse the data received
 		# and set the headers for the client
 
+                # TODO: Handle /vote ~ /attack /retreat /byzantine
+                # TODO: Handle /vote/result
+
 		# If we want to retransmit what we received to the other vessels
 		retransmit = False # Like this, we will just create infinite loops!
 		if retransmit:
 			# do_POST send the message only when the function finishes
 			# We must then create threads if we want to do some heavy computation
-			# 
+			#
 			# Random content
 			thread = Thread(target=self.server.propagate_value_to_vessels,args=("action", "key", "value") )
 			# We kill the process if we kill the server
