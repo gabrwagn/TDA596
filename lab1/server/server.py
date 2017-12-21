@@ -17,7 +17,8 @@ from threading import  Thread # Thread Management
 #------------------------------------------------------------------------------------------------------
 
 # Global variables for HTML templates
-frontpage_template_fo = list(open("vote_frontpage_template.html", 'r'))
+folder = os.path.join(os.getcwd(), "vote_frontpage_template.html")
+frontpage_template_fo = list(open(folder, 'r'))
 
 #------------------------------------------------------------------------------------------------------
 # Static variables definitions
