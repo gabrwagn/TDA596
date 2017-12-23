@@ -175,6 +175,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 #------------------------------------------------------------------------------------------------------
     def do_POST(self):
         print("Receiving a POST on %s" % self.path)
+        self.set_HTTP_headers(200)
         # Here, we should check which path was requested and call the right logic based on it
         # We should also parse the data received
         # and set the headers for the client
