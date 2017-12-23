@@ -17,7 +17,7 @@ from threading import  Thread # Thread Management
 #------------------------------------------------------------------------------------------------------
 import os
 # Global variables for HTML templates
-
+from byzantine_behavior import *
 
 #------------------------------------------------------------------------------------------------------
 # Static variables definitions
@@ -41,9 +41,10 @@ class BlackboardServer(HTTPServer):
 		self.vessel_id = vessel_id
 		# The list of other vessels
 		self.vessels = vessel_list
+		self.is_byzantine = False
 #------------------------------------------------------------------------------------------------------
 	# We add a value received to the vote one store
-	def add_vote(self, vote):
+	def add_vote(self, sender, vote):
 		# We add the value to the store
 		pass
 
@@ -163,11 +164,26 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 		# We should also parse the data received
 		# and set the headers for the client
 
-                # TODO: Handle /vote ~ /attack /retreat /byzantine
-                # TODO: Handle /vote/result
+		data = self.parse_POST_request()
+		print data
+        path_parts = self.path[1:].split('/')
+        sender = data["sender"][0] # Don't know if this is str or int
+
+		if path_parts[1] == "attack":
+			# Handle attack logic
+			self.server.add_vote(sender, "attack")
+		elif path_parts[1] == "retreat":
+			# Handle retreat logic
+			self.server.add_vote(sender, "retreat")
+		elif path_parts[1] == "byzantine":
+			# Call their fuctions
+			self.server.is_byzantine = True
 
 		# If we want to retransmit what we received to the other vessels
-		retransmit = False # Like this, we will just create infinite loops!
+		retransmit = True
+		if sender != self.server.vessel_id:
+			retransmit = False
+		 # Like this, we will just create infinite loops!
 		if retransmit:
 			# do_POST send the message only when the function finishes
 			# We must then create threads if we want to do some heavy computation
