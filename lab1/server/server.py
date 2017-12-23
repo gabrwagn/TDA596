@@ -199,6 +199,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             self.retransmit("/vote/result",self.server.get_vote_vector())
         # TODO Now we need to handle the case where we have all result vectors and we are byzantine 
         # TODO Also handle calculating the final result when we have received all result vectors
+        return
         
 #------------------------------------------------------------------------------------------------------
 # POST Logic
