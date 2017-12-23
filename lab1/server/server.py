@@ -57,7 +57,7 @@ class BlackboardServer(HTTPServer):
         pass
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
-    def contact_vessel(self, vessel_ip, path, data):
+    def contact_vessel(self, vessel, path, data):
         # the Boolean variable we will return
         success = False
         # The variables must be encoded in the URL format, through urllib.urlencode
