@@ -230,10 +230,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
     def handle_reply(self, path_parts, data):
         # We are handling a reply coming from another vessel
         # Once we have received all of the non byzantine votes, we will let byzantine nodes vote
-        
-        if not self.server.is_byzantine:
-            self.server.add_vote(data["sender"][0], path_parts[1]) # Add to the list, byzantine will ignore this
-            
+        self.server.add_vote(data["sender"][0], path_parts[1]) # Add to the list, byzantine will ignore this
 
 
 
