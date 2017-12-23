@@ -51,7 +51,7 @@ class BlackboardServer(HTTPServer):
 
         # Prevent a node from voting more than once
         if not sender in self.vote_one_store:
-            self.vote_one_store[sender] = vote
+            self.vote_one_store[int(sender)] = vote
             # We add the value to the store
             self.number_of_votes_collected += 1
 
