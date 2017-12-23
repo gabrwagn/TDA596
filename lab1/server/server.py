@@ -209,8 +209,8 @@ if __name__ == '__main__':
 			vessel_list.append("10.1.0.%d" % i) # We can add ourselves, we have a test in the propagation
 
 
-	folder = os.path.join(os.getcwd(), "vote_frontpage_template.html")
-	frontpage_template_fo = list(open(folder, 'r'))
+	#folder = os.path.join(os.getcwd(), "vote_frontpage_template.html")
+	#frontpage_template_fo = list(open(folder, 'r'))
 	# We launch a server
 	server = BlackboardServer(('', PORT_NUMBER), BlackboardRequestHandler, vessel_id, vessel_list)
 	print("Starting the server on port %d" % PORT_NUMBER)
