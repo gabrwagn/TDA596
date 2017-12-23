@@ -217,7 +217,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         if path_parts[1] == "byzantine":
             self.server.is_byzantine = True
         else:
-            self.add_vote(self.server.vessel_id, path_parts[1])
+            self.server.add_vote(self.server.vessel_id, path_parts[1])
             data["sender"] = self.server.vessel_id
             self.retransmit(self.path, data)
 
@@ -226,7 +226,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # Once we have received all of the non byzantine votes, we will let byzantine nodes vote
         
         if not self.server.is_byzantine:
-            self.add_vote(data["sender"][0], path_parts[1]) # Add to the list, byzantine will ignore this
+            self.server.add_vote(data["sender"][0], path_parts[1]) # Add to the list, byzantine will ignore this
             
 
 
