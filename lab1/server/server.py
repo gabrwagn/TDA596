@@ -48,13 +48,17 @@ class BlackboardServer(HTTPServer):
 #------------------------------------------------------------------------------------------------------
     # We add a value received to the vote one store
     def add_vote(self, sender, vote):
-        # We add the value to the store
-        self.number_of_votes_collected += 1
 
+        # Prevent a node from voting more than once
+        if not sender in self.vote_one_store:
+            self.vote_one_store[sender] = vote
+            # We add the value to the store
+            self.number_of_votes_collected += 1
+
+        print self.vote_one_store
     # We add a value received to the vote two store
     def add_result_vector(self, vector):
-        # We add the value to the store
-        pass
+        self.vote_two_store.append(vector)
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
     def contact_vessel(self, vessel, path, data):
