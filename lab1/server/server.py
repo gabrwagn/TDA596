@@ -168,7 +168,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 		print data
         path_parts = self.path[1:].split('/')
         sender = data["sender"][0] # Don't know if this is str or int
-
 		if path_parts[1] == "attack":
 			# Handle attack logic
 			self.server.add_vote(sender, "attack")
