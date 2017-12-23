@@ -42,11 +42,14 @@ class BlackboardServer(HTTPServer):
         # The list of other vessels
         self.vessels = vessel_list
         self.is_byzantine = False
+        self.number_of_votes_collected = 0
+        self.number_of_loyal_nodes = 2 # Will need to change this value for testing task 2 (maybe)
+
 #------------------------------------------------------------------------------------------------------
     # We add a value received to the vote one store
     def add_vote(self, sender, vote):
         # We add the value to the store
-        pass
+        self.number_of_votes_collected += 1
 
     # We add a value received to the vote two store
     def add_result_vector(self, vector):
@@ -54,11 +57,11 @@ class BlackboardServer(HTTPServer):
         pass
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
-    def contact_vessel(self, vessel_ip, path, action, key, value):
+    def contact_vessel(self, vessel_ip, path, data):
         # the Boolean variable we will return
         success = False
         # The variables must be encoded in the URL format, through urllib.urlencode
-        post_content = urlencode({'action': action, 'key': key, 'value': value})
+        post_content = urlencode(data)
         # the HTTP header must contain the type of data we are transmitting, here URL encoded
         headers = {"Content-type": "application/x-www-form-urlencoded"}
         # We should try to catch errors when contacting the vessel
@@ -87,14 +90,26 @@ class BlackboardServer(HTTPServer):
         return success
 #------------------------------------------------------------------------------------------------------
     # We send a received value to all the other vessels of the system
-    def propagate_value_to_vessels(self, path, action, key, value):
+    def propagate_value_to_vessels(self, path, data):
         # We iterate through the vessel list
         for vessel in self.vessels:
             # We should not send it to our own IP, or we would create an infinite loop of updates
             if vessel != ("10.1.0.%s" % self.vessel_id):
                 # A good practice would be to try again if the request failed
                 # Here, we do it only once
-                self.contact_vessel(vessel, path, action, key, value)
+                self.contact_vessel(vessel, path, data)
+    
+    # This function incorporates the same logic as the function given to use in the 
+    # Byzantine_behavior.py file but sends directly to nodes  
+    def byzantine_vote_one_to_other_vessels(self, data):
+        count = 1
+        for vessel in self.vessels:
+            if vessel != ("10.1.0.%s" % self.vessel_id):
+                if count % 2 == 0:
+                    self.contact_vessel(vessel, "/vote/attack", data)
+                else:
+                    self.contact_vessel(vessel, "/vote/retreat", data)
+                count += 1
 #------------------------------------------------------------------------------------------------------
 
 
@@ -165,40 +180,54 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # and set the headers for the client
 
         data = self.parse_POST_request()
-        print data
         path_parts = self.path[1:].split('/')
-        sender = data["sender"][0] # Don't know if this is str or int
-        
-        if path_parts[1] == "attack":
-            # Handle attack logic
-            self.server.add_vote(sender, "attack")
-        elif path_parts[1] == "retreat":
-            # Handle retreat logic
-            self.server.add_vote(sender, "retreat")
-        elif path_parts[1] == "byzantine":
-            # Call their fuctions
-            self.server.is_byzantine = True
 
-        # If we want to retransmit what we received to the other vessels
+        # If the sender field is in the data, we are receiving a relay message
+        # else we are the node who is voting
         retransmit = True
-        if sender != self.server.vessel_id:
-            retransmit = False
-         # Like this, we will just create infinite loops!
-        if retransmit:
-            # do_POST send the message only when the function finishes
-            # We must then create threads if we want to do some heavy computation
-            #
-            # Random content
-            thread = Thread(target=self.server.propagate_value_to_vessels,args=("action", "key", "value") )
-            # We kill the process if we kill the server
-            thread.daemon = True
-            # We start the thread
-            thread.start()
+        if "sender" in data:
+            sender = data["sender"][0] # Don't know if this is str or int
+            print data
+            self.handle_reply(path_parts, data)
+        else:
+            self.handle_local(path_parts, data)
+
+        if self.server.is_byzantine and self.server.number_of_loyal_nodes == self.server.number_of_votes_collected:
+            self.server.byzantine_vote_one_to_other_vessels({"sender": self.server.vessel_id}) # Maybe make to int
+        if self.server.number_of_votes_collected == len(self.server.vessels) and not self.server.is_byzantine:
+            # Now it is time for us to send out our result vectors
+            self.retransmit("/vote/result",self.server.get_vote_vector())
+        # TODO Now we need to handle the case where we have all result vectors and we are byzantine 
+        # TODO Also handle calculating the final result when we have received all result vectors
+        
 #------------------------------------------------------------------------------------------------------
 # POST Logic
 #------------------------------------------------------------------------------------------------------
     # We might want some functions here as well
 #------------------------------------------------------------------------------------------------------
+
+    def retransmit(self, path, data):
+        thread = Thread(target=self.server.propagate_value_to_vessels,args=(self.path, data)) # May need to reformat data 
+        thread.daemon = True
+        thread.start()
+
+    def handle_local(self, path_parts, data):
+        # We are making the post on a local vessel
+        # We need to add to the data and add to our data if we are not byzantine
+        if path_parts[1] == "byzantine":
+            self.server.is_byzantine = True
+        else:
+            self.add_vote(self.server.vessel_id, path_parts[1])
+            data["sender"] = self.server.vessel_id
+            self.retransmit(self.path, data)
+
+    def handle_reply(self, path_parts, data):
+        # We are handling a reply coming from another vessel
+        # Once we have received all of the non byzantine votes, we will let byzantine nodes vote
+        
+        if not self.server.is_byzantine:
+            self.add_vote(data["sender"][0], path_parts[1]) # Add to the list, byzantine will ignore this
+            
 
 
 
