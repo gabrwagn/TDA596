@@ -105,6 +105,7 @@ class BlackboardServer(HTTPServer):
         # the Boolean variable we will return
         success = False
         # The variables must be encoded in the URL format, through urllib.urlencode
+        print data
         post_content = urlencode(data)
         # the HTTP header must contain the type of data we are transmitting, here URL encoded
         headers = {"Content-type": "application/x-www-form-urlencoded"}
