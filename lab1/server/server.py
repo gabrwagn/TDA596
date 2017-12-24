@@ -293,6 +293,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 self.byzantine_vote_one_prop() # Maybe make to int
             if self.server.number_of_votes_collected == len(self.server.vessels) and not self.server.is_byzantine:
                 # Now it is time for us to send out our result vectors
+                self.server.add_result_vector(self.server.vote_one_store)
                 print "HONEST NODE SENDING RESULT VECTOR TO OTHER NODES"
                 self.retransmit("/vote/result", self.server.get_vote_vector())
 
