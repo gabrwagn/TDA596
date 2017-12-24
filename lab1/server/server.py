@@ -315,7 +315,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         thread.start()
 
     def retransmit(self, path, data):
-        thread = Thread(target=self.server.propagate_value_to_vessels,args=(self.path, data)) # May need to reformat data 
+        thread = Thread(target=self.server.propagate_value_to_vessels,args=(path, data)) # May need to reformat data 
         thread.daemon = True
         thread.start()
 
