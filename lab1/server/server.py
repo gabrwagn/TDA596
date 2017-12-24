@@ -166,14 +166,14 @@ class BlackboardServer(HTTPServer):
                     self.contact_vessel(vessel, "/vote/retreat", data)
                 count += 1
     
-    def byzantine_vote_two_to_other_vessels(self, data, fake):
+    def byzantine_vote_two_to_other_vessels(self, data):
         i = 0
         print "WE ARE SENDING OUR VOTE VECTORS TO OTHERS FROM BYZANTINE"
         print data
         # var i should never be more or less than # of vessels
         for vessel in self.vessels:
             if vessel != ("10.1.0.%s" % self.vessel_id):
-                self.contact_vessel("/vote/result", data[i])
+                self.contact_vessel(vessel, "/vote/result", data[i])
             i += 1
 #------------------------------------------------------------------------------------------------------
 
