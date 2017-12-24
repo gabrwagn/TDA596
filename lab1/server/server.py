@@ -17,7 +17,7 @@ from threading import  Thread # Thread Management
 #------------------------------------------------------------------------------------------------------
 import os
 # Global variables for HTML templates
-from byzantine_behavior import *
+import byzantine_behavior
 
 #------------------------------------------------------------------------------------------------------
 # Static variables definitions
