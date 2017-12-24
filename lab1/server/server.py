@@ -265,6 +265,9 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                     # We need to make a final decision on our strategy
                     self.server.make_final_decision()
         else:
+            if self.server.number_of_votes_collected == len(self.server.vessels):
+                print "\nWe are getting extra props\n"
+                return
             if "sender" in data:
                 sender = data["sender"][0] # Don't know if this is str or int
                 print "GETTING A RELAY"
