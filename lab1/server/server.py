@@ -168,12 +168,8 @@ class BlackboardServer(HTTPServer):
     # Byzantine_behavior.py file but sends directly to nodes  
     def byzantine_vote_one_to_other_vessels(self, d):
         count = 1
-        print '\n'
-        print "BYZANTINE VOTE PROPOGATIONS >>>>>>>>>>>>>>>"
         data = {}
         data["sender"] = self.vessel_id
-        print data
-        print '\n'
         for vessel in self.vessels:
             if vessel != ("10.1.0.%s" % self.vessel_id):
                 if count % 2 == 0:
@@ -183,23 +179,18 @@ class BlackboardServer(HTTPServer):
                 count += 1
     
     def byzantine_vote_two_to_other_vessels(self, data):
-        i = 0
-        print "WE ARE SENDING OUR VOTE VECTORS TO OTHERS FROM BYZANTINE"
-        print data
-    
+        i = 0    
         for vessel in self.vessels:
             if vessel != ("10.1.0.%s" % self.vessel_id):
-
                 # We need to format the dict so that we have consistency when sending
-                sending_data = {}
-                j = 1
-                for el in data[i]:
-                    sending_data[j] = el
-                    j += 1
-                print "sending vessel: %s" % vessel
-                print sending_data
-                self.contact_vessel(vessel, "/vote/result", sending_data)
                 i += 1
+            sending_data = {}
+            j = 1
+            for el in data[i]:
+                sending_data[j] = el
+                j += 1
+            self.contact_vessel(vessel, "/vote/result", sending_data)
+
 #------------------------------------------------------------------------------------------------------
 
 
@@ -286,14 +277,6 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 vote_vectors = byzantine_behavior.compute_byzantine_vote_round2(self.server.number_of_loyal_nodes, len(self.server.vessels), True)
                 vote_vectors = self.reformat_vectors(vote_vectors)
                 self.byzantine_vote_two_prop(vote_vectors)
-                self.server.add_result_vector(self.compute_fake_data())
-                # Need to make sure that we compute result when all of our vectors are here
-                # If we have more than one byzantine entity, it will be caught in the if statment in the 
-                # else statment below
-                print self.server.vote_two_store
-                if len(self.server.vote_two_store) == len(self.server.vessels):
-                    self.server.make_final_decision()
-
             else:
                 if len(self.server.vote_two_store) == len(self.server.vessels):
                     print "MAKING FINAL DECISION"
@@ -301,16 +284,11 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                     self.server.make_final_decision()
         else:
             if self.server.number_of_votes_collected == len(self.server.vessels):
-                print "\nWe are getting extra props\n"
                 return
             if "sender" in data:
                 sender = data["sender"][0] # Don't know if this is str or int
-                print "GETTING A RELAY"
                 self.handle_relay(path_parts, data)
             else:
-                print "HANDLING LOCAL REQUEST"
-                print path_parts
-                print data
                 self.handle_local(path_parts, data)
 
             if self.server.is_byzantine and self.server.number_of_loyal_nodes == self.server.number_of_votes_collected:
@@ -318,17 +296,16 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             if self.server.number_of_votes_collected == len(self.server.vessels) and not self.server.is_byzantine:
                 # Now it is time for us to send out our result vectors
                 self.server.add_result_vector(self.server.vote_one_store)
-                print "HONEST NODE SENDING RESULT VECTOR TO OTHER NODES"
                 self.retransmit("/vote/result", self.server.get_vote_vector())
 
         return
         
-    def compute_fake_data(self):
-        r_val = {}
-        i = 0
-        while i < len(self.server.vessels):
-            r_val[i + 1] = "attack"
-        return r_val
+    # def compute_fake_data(self):
+    #     r_val = {}
+    #     i = 0
+    #     while i < len(self.server.vessels):
+    #         r_val[i + 1] = "attack"
+    #     return r_val
     def reformat_data(self, data):
         r_val = {}
         for key in data:
