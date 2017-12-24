@@ -272,7 +272,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 self.byzantine_vote_two_prop(vote_vectors)
 
             else:
-                if self.server.vote_two_store == len(self.server.vessels):
+                if len(self.server.vote_two_store) == len(self.server.vessels):
                     print "MAKING FINAL DECISION"
                     # We need to make a final decision on our strategy
                     self.server.make_final_decision()
