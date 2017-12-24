@@ -166,8 +166,10 @@ class BlackboardServer(HTTPServer):
                     self.contact_vessel(vessel, "/vote/retreat", data)
                 count += 1
     
-    def byzantine_vote_two_to_other_vessels(self, data):
+    def byzantine_vote_two_to_other_vessels(self, data, fake):
         i = 0
+        print "WE ARE SENDING OUR VOTE VECTORS TO OTHERS FROM BYZANTINE"
+        print data
         # var i should never be more or less than # of vessels
         for vessel in self.vessels:
             if vessel != ("10.1.0.%s" % self.vessel_id):
@@ -310,7 +312,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         thread.start()
 
     def byzantine_vote_two_prop(self, data):
-        thread = Thread(target=self.server.byzantine_vote_two_to_other_vessels,args=(data))
+        thread = Thread(target=self.server.byzantine_vote_two_to_other_vessels, args=(data))
         thread.daemon = True
         thread.start()
 
