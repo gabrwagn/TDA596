@@ -56,7 +56,6 @@ class BlackboardServer(HTTPServer):
             # We add the value to the store
             self.number_of_votes_collected += 1
 
-        print self.vote_one_store
     # We add a value received to the vote two store
     def add_result_vector(self, vector):
         add_vector = {}
@@ -85,6 +84,7 @@ class BlackboardServer(HTTPServer):
                 else:
                     num_retreats += 1
         self.final_decision = "attack" if num_attacks >= num_retreats else "retreat"
+        print self.vote_two_store
         print self.final_decision
 
         # final_vector = [] # We just need a list for this
@@ -187,7 +187,7 @@ class BlackboardServer(HTTPServer):
                 sending_data[j] = el
                 j += 1
             self.contact_vessel(vessel, "/vote/result", sending_data)
-            
+
             if vessel != ("10.1.0.%s" % self.vessel_id):
                 i += 1
             
