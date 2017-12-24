@@ -86,7 +86,6 @@ class BlackboardServer(HTTPServer):
                     num_retreats += 1
         self.final_decision = "attack" if num_attacks >= num_retreats else "retreat"
         print self.final_decision
-        
 
         # final_vector = [] # We just need a list for this
         # temp_vector = []
@@ -100,7 +99,7 @@ class BlackboardServer(HTTPServer):
         #     final_vector.append(self.compute_result(temp_vector))
         #     i += 1
         # self.final_decision = self.compute_final_result(final_vector)
-        print self.final_decision
+        
             
     def compute_result(self, vector):
         if "attack" in vector and "retreat" in vector:
@@ -287,6 +286,12 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 vote_vectors = byzantine_behavior.compute_byzantine_vote_round2(self.server.number_of_loyal_nodes, len(self.server.vessels), True)
                 vote_vectors = self.reformat_vectors(vote_vectors)
                 self.byzantine_vote_two_prop(vote_vectors)
+                self.add_result_vector(self.compute_fake_data())
+                # Need to make sure that we compute result when all of our vectors are here
+                # If we have more than one byzantine entity, it will be caught in the if statment in the 
+                # else statment below
+                if len(self.server.vote_two_store) == len(self.server.vessels):
+                    self.server.make_final_decision
 
             else:
                 if len(self.server.vote_two_store) == len(self.server.vessels):
@@ -317,6 +322,12 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
 
         return
         
+    def compute_fake_data(self):
+        r_val = {}
+        i = 0
+        while i < len(self.server.vessels):
+            r_val[i + 1] = "retreat"
+        return r_val
     def reformat_data(self, data):
         r_val = {}
         for key in data:
