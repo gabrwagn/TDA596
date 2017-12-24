@@ -176,7 +176,7 @@ class BlackboardServer(HTTPServer):
 
                 # We need to format the dict so that we have consistency when sending
                 sending_data = {}
-                j = 0
+                j = 1
                 for el in data[i]:
                     sending_data[j] = el
                     j += 1
