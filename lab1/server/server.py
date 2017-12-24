@@ -290,6 +290,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 # Need to make sure that we compute result when all of our vectors are here
                 # If we have more than one byzantine entity, it will be caught in the if statment in the 
                 # else statment below
+                print self.server.vote_two_store
                 if len(self.server.vote_two_store) == len(self.server.vessels):
                     self.server.make_final_decision()
 
@@ -326,7 +327,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         r_val = {}
         i = 0
         while i < len(self.server.vessels):
-            r_val[i + 1] = "retreat"
+            r_val[i + 1] = "attack"
         return r_val
     def reformat_data(self, data):
         r_val = {}
