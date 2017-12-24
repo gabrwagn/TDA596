@@ -75,18 +75,31 @@ class BlackboardServer(HTTPServer):
     def make_final_decision(self):
         # We use the vote 2 store to make our decision
         # Default behavior is to attack
-        final_vector = [] # We just need a list for this
-        temp_vector = []
-        i = 0 # col number
-        j = 0 # row number
-        print self.vote_two_store
-        while i < len(self.vote_two_store):
-            while j < len(self.vote_two_store):
-                temp_vector.append(self.vote_two_store[j][i + 1])
-                j += 1
-            final_vector.append(self.compute_result(temp_vector))
-            i += 1
+        num_attacks = 0
+        num_retreats = 0
+
+        for dictionary in self.vote_two_store:
+            for key in dictionary:
+                if dictionary[key] == "attack":
+                    num_attacks += 1
+                else:
+                    num_retreats += 1
         self.final_decision = self.compute_final_result(final_vector)
+        print self.final_decision
+        return "attack" if num_attacks >= num_retreats else "retreat"
+
+        # final_vector = [] # We just need a list for this
+        # temp_vector = []
+        # i = 0 # col number
+        # j = 0 # row number
+        # print self.vote_two_store
+        # while i < len(self.vote_two_store):
+        #     while j < len(self.vote_two_store):
+        #         temp_vector.append(self.vote_two_store[j][i + 1])
+        #         j += 1
+        #     final_vector.append(self.compute_result(temp_vector))
+        #     i += 1
+        # self.final_decision = self.compute_final_result(final_vector)
         print self.final_decision
             
     def compute_result(self, vector):
