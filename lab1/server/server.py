@@ -44,6 +44,7 @@ class BlackboardServer(HTTPServer):
         self.is_byzantine = False
         self.number_of_votes_collected = 0
         self.number_of_loyal_nodes = 2 # Will need to change this value for testing task 2 (maybe)
+        self.final_decision = ""
 
 #------------------------------------------------------------------------------------------------------
     # We add a value received to the vote one store
@@ -59,6 +60,45 @@ class BlackboardServer(HTTPServer):
     # We add a value received to the vote two store
     def add_result_vector(self, vector):
         self.vote_two_store.append(vector)
+
+    def get_vote_vector(self):
+        return self.vote_one_store
+
+    def make_final_decision(self):
+        # We use the vote 2 store to make our decision
+        # Default behavior is to attack
+        final_vector = [] # We just need a list for this
+        temp_vector = []
+        i = 0 # col number
+        j = 0 # row number
+        while i < len(self.vote_two_store):
+            while j < len(self.vote_two_store):
+                temp_vector[j] = self.vote_two_store[j][i]
+                j += 1
+            final_vector[i] = self.compute_result(temp_vector)
+            i += 1
+        self.final_decision = self.compute_final_result(final_vector)
+        print final_decision
+            
+    def compute_result(self, vector):
+        if "attack" in vector and "retreat" in vector:
+            return "attack" # Default stategy
+        elif "attack" in vector:
+            return "attack" # all nodes voted attack
+        else:
+            return "retreat" # all nodes voted retreat
+            
+    def compute_final_result(self, vector):
+        num_attacks = 0
+        num_retreats = 0
+        for i in vector:
+            if i == "attack":
+                num_attacks += 1
+            else:
+                num_retreats += 1
+        return "attack" if num_attacks >= num_retreats else "retreat"
+
+
 #------------------------------------------------------------------------------------------------------
 # Contact a specific vessel with a set of variables to transmit to it
     def contact_vessel(self, vessel, path, data):
@@ -114,6 +154,14 @@ class BlackboardServer(HTTPServer):
                 else:
                     self.contact_vessel(vessel, "/vote/retreat", data)
                 count += 1
+    
+    def byzantine_vote_two_to_other_vessels(self, data):
+        i = 0
+        # var i should never be more or less than # of vessels
+        for vessel in self.vessels:
+            if vessel != ("10.1.0.%s" % self.vessel_id):
+                self.contact_vessel("/vote/result", data[i])
+            i += 1
 #------------------------------------------------------------------------------------------------------
 
 
@@ -184,33 +232,68 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # We should also parse the data received
         # and set the headers for the client
 
+        if self.server.final_decision == "":
+            return
+
         data = self.parse_POST_request()
         path_parts = self.path[1:].split('/')
 
-        # If the sender field is in the data, we are receiving a relay message
-        # else we are the node who is voting
-        retransmit = True
-        if "sender" in data:
-            sender = data["sender"][0] # Don't know if this is str or int
-            print data
-            self.handle_reply(path_parts, data)
-        else:
-            self.handle_local(path_parts, data)
+        if "result" in path_parts:
+            # We are dealing with round 2 voting
+            data = self.reformat_data(data)
+            self.server.add_result_vector(data)
+            if self.server.is_byzantine and len(self.server.vote_two_store) == self.server.number_of_loyal_nodes:
+                # We have received all honest nodes' vectors and now we need to call external function
+                # and cast our byzantine vote
+                vote_vectors = byzantine_behavior.compute_byzantine_vote_round2(self.server.number_of_loyal_nodes, len(self.server.vessels), True)
+                vote_vectors = self.reformat_vectors(vote_vectors)
+                self.byzantine_vote_two_prop(vote_vectors)
 
-        if self.server.is_byzantine and self.server.number_of_loyal_nodes == self.server.number_of_votes_collected:
-            self.server.byzantine_vote_one_to_other_vessels({"sender": self.server.vessel_id}) # Maybe make to int
-        if self.server.number_of_votes_collected == len(self.server.vessels) and not self.server.is_byzantine:
-            # Now it is time for us to send out our result vectors
-            self.retransmit("/vote/result",self.server.get_vote_vector())
-        # TODO Now we need to handle the case where we have all result vectors and we are byzantine 
-        # TODO Also handle calculating the final result when we have received all result vectors
+            else:
+                if self.server.vote_two_store == self.server.number_of_loyal_nodes:
+                    # We need to make a final decision on our strategy
+                    self.server.make_final_decision()
+        else:
+            if "sender" in data:
+                sender = data["sender"][0] # Don't know if this is str or int
+                print data
+                self.handle_reply(path_parts, data)
+            else:
+                self.handle_local(path_parts, data)
+
+            if self.server.is_byzantine and self.server.number_of_loyal_nodes == self.server.number_of_votes_collected:
+                self.byzantine_vote_one_prop({"sender": self.server.vessel_id}) # Maybe make to int
+            if self.server.number_of_votes_collected == len(self.server.vessels) and not self.server.is_byzantine:
+                # Now it is time for us to send out our result vectors
+                self.retransmit("/vote/result", self.server.get_vote_vector())
         return
         
+    def reformat_data(self, data):
+        r_val = {}
+        for key in data:
+            r_val[key] = data[key][0]
+        return r_val
+
+    def reformat_vectors(self, vectors):
+        r_vectors = []
+        for vector in vectors:
+            r_vectors.append(["attack" if x else "retreat" for x in vector])
+        return r_vectors
 #------------------------------------------------------------------------------------------------------
 # POST Logic
 #------------------------------------------------------------------------------------------------------
     # We might want some functions here as well
 #------------------------------------------------------------------------------------------------------
+
+    def byzantine_vote_one_prop(self, data):
+        thread = Thread(target=self.server.byzantine_vote_one_to_other_vessels,args=(data))
+        thread.daemon = True
+        thread.start()
+
+    def byzantine_vote_two_prop(self, data):
+        thread = Thread(target=self.server.byzantine_vote_two_to_other_vessels,args=(data))
+        thread.daemon = True
+        thread.start()
 
     def retransmit(self, path, data):
         thread = Thread(target=self.server.propagate_value_to_vessels,args=(self.path, data)) # May need to reformat data 
@@ -231,6 +314,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # We are handling a reply coming from another vessel
         # Once we have received all of the non byzantine votes, we will let byzantine nodes vote
         self.server.add_vote(data["sender"][0], path_parts[1]) # Add to the list, byzantine will ignore this
+
 
 
 
