@@ -84,9 +84,9 @@ class BlackboardServer(HTTPServer):
                     num_attacks += 1
                 else:
                     num_retreats += 1
-        self.final_decision = self.compute_final_result(final_vector)
+        self.final_decision = "attack" if num_attacks >= num_retreats else "retreat"
         print self.final_decision
-        return "attack" if num_attacks >= num_retreats else "retreat"
+        
 
         # final_vector = [] # We just need a list for this
         # temp_vector = []
