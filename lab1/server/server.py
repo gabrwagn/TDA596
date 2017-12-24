@@ -82,10 +82,9 @@ class BlackboardServer(HTTPServer):
         print self.vote_two_store
         while i < len(self.vote_two_store):
             while j < len(self.vote_two_store):
-                print self.vote_two_store[j]
-                temp_vector[j] = self.vote_two_store[j][i + 1]
+                temp_vector.append(self.vote_two_store[j][i + 1])
                 j += 1
-            final_vector[i] = self.compute_result(temp_vector)
+            final_vector.append(self.compute_result(temp_vector))
             i += 1
         self.final_decision = self.compute_final_result(final_vector)
         print final_decision
