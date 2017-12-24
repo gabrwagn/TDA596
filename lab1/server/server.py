@@ -173,7 +173,14 @@ class BlackboardServer(HTTPServer):
         # var i should never be more or less than # of vessels
         for vessel in self.vessels:
             if vessel != ("10.1.0.%s" % self.vessel_id):
-                self.contact_vessel(vessel, "/vote/result", data[i])
+
+                # We need to format the dict so that we have consistency when sending
+                sending_data = {}
+                j = 0
+                for el in data[i]:
+                    sending_data[j] = el
+                    j += 1
+                self.contact_vessel(vessel, "/vote/result", sending_data)
             i += 1
 #------------------------------------------------------------------------------------------------------
 
