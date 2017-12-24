@@ -59,7 +59,10 @@ class BlackboardServer(HTTPServer):
         print self.vote_one_store
     # We add a value received to the vote two store
     def add_result_vector(self, vector):
-        self.vote_two_store.append(vector)
+        add_vector = {}
+        for key in vector:
+            add_vector[int(key)] = vector[key]
+        self.vote_two_store.append(add_vector)
 
     def get_vote_vector(self):
         # The python API needs keys to be in a string format for urlencoding
