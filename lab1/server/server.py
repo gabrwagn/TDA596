@@ -286,12 +286,12 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 vote_vectors = byzantine_behavior.compute_byzantine_vote_round2(self.server.number_of_loyal_nodes, len(self.server.vessels), True)
                 vote_vectors = self.reformat_vectors(vote_vectors)
                 self.byzantine_vote_two_prop(vote_vectors)
-                self.add_result_vector(self.compute_fake_data())
+                self.server.add_result_vector(self.compute_fake_data())
                 # Need to make sure that we compute result when all of our vectors are here
                 # If we have more than one byzantine entity, it will be caught in the if statment in the 
                 # else statment below
                 if len(self.server.vote_two_store) == len(self.server.vessels):
-                    self.server.make_final_decision
+                    self.server.make_final_decision()
 
             else:
                 if len(self.server.vote_two_store) == len(self.server.vessels):
