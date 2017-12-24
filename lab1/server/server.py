@@ -271,7 +271,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 self.handle_local(path_parts, data)
 
             if self.server.is_byzantine and self.server.number_of_loyal_nodes == self.server.number_of_votes_collected:
-                self.byzantine_vote_one_prop({"sender": str(self.server.vessel_id)}) # Maybe make to int
+                self.byzantine_vote_one_prop() # Maybe make to int
             if self.server.number_of_votes_collected == len(self.server.vessels) and not self.server.is_byzantine:
                 # Now it is time for us to send out our result vectors
                 self.retransmit("/vote/result", self.server.get_vote_vector())
@@ -294,8 +294,8 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
     # We might want some functions here as well
 #------------------------------------------------------------------------------------------------------
 
-    def byzantine_vote_one_prop(self, data):
-        thread = Thread(target=self.server.byzantine_vote_one_to_other_vessels,args=(data))
+    def byzantine_vote_one_prop(self):
+        thread = Thread(target=self.server.byzantine_vote_one_to_other_vessels,args=({"sender": self.server.vessel_id}))
         thread.daemon = True
         thread.start()
 
