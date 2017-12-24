@@ -43,7 +43,7 @@ class BlackboardServer(HTTPServer):
         self.vessels = vessel_list
         self.is_byzantine = False
         self.number_of_votes_collected = 0
-        self.number_of_loyal_nodes = 2 # Will need to change this value for testing task 2 (maybe)
+        self.number_of_loyal_nodes = len(self.vessels) - 1
         self.final_decision = ""
 
 #------------------------------------------------------------------------------------------------------
@@ -62,7 +62,11 @@ class BlackboardServer(HTTPServer):
         self.vote_two_store.append(vector)
 
     def get_vote_vector(self):
-        return self.vote_one_store
+        # The python API needs keys to be in a string format for urlencoding
+        r_val = {}
+        for key in self.vote_one_store:
+            r_val[str(key)] = self.vote_one_store[key]
+        return r_val
 
     def make_final_decision(self):
         # We use the vote 2 store to make our decision
