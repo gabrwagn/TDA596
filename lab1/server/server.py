@@ -181,7 +181,7 @@ class BlackboardServer(HTTPServer):
                     sending_data[j] = el
                     j += 1
                 self.contact_vessel(vessel, "/vote/result", sending_data)
-            i += 1
+                i += 1
 #------------------------------------------------------------------------------------------------------
 
 
