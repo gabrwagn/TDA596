@@ -170,7 +170,7 @@ class BlackboardServer(HTTPServer):
         i = 0
         print "WE ARE SENDING OUR VOTE VECTORS TO OTHERS FROM BYZANTINE"
         print data
-        # var i should never be more or less than # of vessels
+    
         for vessel in self.vessels:
             if vessel != ("10.1.0.%s" % self.vessel_id):
 
@@ -180,6 +180,8 @@ class BlackboardServer(HTTPServer):
                 for el in data[i]:
                     sending_data[j] = el
                     j += 1
+                print "sending vessel: %s" % vessel
+                print sending_data
                 self.contact_vessel(vessel, "/vote/result", sending_data)
                 i += 1
 #------------------------------------------------------------------------------------------------------
