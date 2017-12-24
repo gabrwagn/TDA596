@@ -150,10 +150,12 @@ class BlackboardServer(HTTPServer):
     
     # This function incorporates the same logic as the function given to use in the 
     # Byzantine_behavior.py file but sends directly to nodes  
-    def byzantine_vote_one_to_other_vessels(self, data):
+    def byzantine_vote_one_to_other_vessels(self, d):
         count = 1
         print '\n'
         print "BYZANTINE VOTE PROPOGATIONS >>>>>>>>>>>>>>>"
+        data = {}
+        data["sender"] = self.server.vessel_id
         print data
         print '\n'
         for vessel in self.vessels:
