@@ -181,15 +181,16 @@ class BlackboardServer(HTTPServer):
     def byzantine_vote_two_to_other_vessels(self, data):
         i = 0    
         for vessel in self.vessels:
-            if vessel != ("10.1.0.%s" % self.vessel_id):
-                # We need to format the dict so that we have consistency when sending
-                i += 1
             sending_data = {}
             j = 1
             for el in data[i]:
                 sending_data[j] = el
                 j += 1
             self.contact_vessel(vessel, "/vote/result", sending_data)
+            
+            if vessel != ("10.1.0.%s" % self.vessel_id):
+                i += 1
+            
 
 #------------------------------------------------------------------------------------------------------
 
