@@ -155,7 +155,7 @@ class BlackboardServer(HTTPServer):
         print '\n'
         print "BYZANTINE VOTE PROPOGATIONS >>>>>>>>>>>>>>>"
         data = {}
-        data["sender"] = self.server.vessel_id
+        data["sender"] = self.vessel_id
         print data
         print '\n'
         for vessel in self.vessels:
