@@ -63,10 +63,11 @@ class BlackboardServer(HTTPServer):
 
     def get_vote_vector(self):
         # The python API needs keys to be in a string format for urlencoding
-        r_val = {}
-        for key in self.vote_one_store:
-            r_val[str(key)] = self.vote_one_store[key]
-        return r_val
+        # r_val = {}
+        # for key in self.vote_one_store:
+        #     r_val[str(key)] = self.vote_one_store[key]
+        # return r_val
+        return self.vote_one_store
 
     def make_final_decision(self):
         # We use the vote 2 store to make our decision
@@ -267,7 +268,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 self.handle_local(path_parts, data)
 
             if self.server.is_byzantine and self.server.number_of_loyal_nodes == self.server.number_of_votes_collected:
-                self.byzantine_vote_one_prop({"sender": self.server.vessel_id}) # Maybe make to int
+                self.byzantine_vote_one_prop({"sender": str(self.server.vessel_id)}) # Maybe make to int
             if self.server.number_of_votes_collected == len(self.server.vessels) and not self.server.is_byzantine:
                 # Now it is time for us to send out our result vectors
                 self.retransmit("/vote/result", self.server.get_vote_vector())
