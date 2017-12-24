@@ -267,16 +267,19 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         else:
             if "sender" in data:
                 sender = data["sender"][0] # Don't know if this is str or int
-                print data
-                self.handle_reply(path_parts, data)
+                print "GETTING A RELAY"
+                self.handle_relay(path_parts, data)
             else:
+                print "HANDLING LOCAL REQUEST"
                 self.handle_local(path_parts, data)
 
             if self.server.is_byzantine and self.server.number_of_loyal_nodes == self.server.number_of_votes_collected:
                 self.byzantine_vote_one_prop() # Maybe make to int
             if self.server.number_of_votes_collected == len(self.server.vessels) and not self.server.is_byzantine:
                 # Now it is time for us to send out our result vectors
+                print "HONEST NODE SENDING RESULT VECTOR TO OTHER NODES"
                 self.retransmit("/vote/result", self.server.get_vote_vector())
+
         return
         
     def reformat_data(self, data):
@@ -321,8 +324,8 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
             data["sender"] = self.server.vessel_id
             self.retransmit(self.path, data)
 
-    def handle_reply(self, path_parts, data):
-        # We are handling a reply coming from another vessel
+    def handle_relay(self, path_parts, data):
+        # We are handling a relay coming from another vessel
         # Once we have received all of the non byzantine votes, we will let byzantine nodes vote
         self.server.add_vote(data["sender"][0], path_parts[1]) # Add to the list, byzantine will ignore this
 
