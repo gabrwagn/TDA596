@@ -87,7 +87,7 @@ class BlackboardServer(HTTPServer):
             final_vector.append(self.compute_result(temp_vector))
             i += 1
         self.final_decision = self.compute_final_result(final_vector)
-        print final_decision
+        print self.final_decision
             
     def compute_result(self, vector):
         if "attack" in vector and "retreat" in vector:
