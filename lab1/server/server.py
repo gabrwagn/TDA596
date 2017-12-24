@@ -312,7 +312,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         thread.start()
 
     def byzantine_vote_two_prop(self, data):
-        thread = Thread(target=self.server.byzantine_vote_two_to_other_vessels, args=(data))
+        thread = Thread(target=self.server.byzantine_vote_two_to_other_vessels, args=([data]))
         thread.daemon = True
         thread.start()
 
