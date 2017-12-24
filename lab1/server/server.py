@@ -110,7 +110,6 @@ class BlackboardServer(HTTPServer):
         # the Boolean variable we will return
         success = False
         # The variables must be encoded in the URL format, through urllib.urlencode
-        print data
         post_content = urlencode(data)
         # the HTTP header must contain the type of data we are transmitting, here URL encoded
         headers = {"Content-type": "application/x-www-form-urlencoded"}
@@ -153,6 +152,10 @@ class BlackboardServer(HTTPServer):
     # Byzantine_behavior.py file but sends directly to nodes  
     def byzantine_vote_one_to_other_vessels(self, data):
         count = 1
+        print '\n'
+        print "BYZANTINE VOTE PROPOGATIONS >>>>>>>>>>>>>>>"
+        print data
+        print '\n'
         for vessel in self.vessels:
             if vessel != ("10.1.0.%s" % self.vessel_id):
                 if count % 2 == 0:
