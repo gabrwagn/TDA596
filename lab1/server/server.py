@@ -271,6 +271,8 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 self.handle_relay(path_parts, data)
             else:
                 print "HANDLING LOCAL REQUEST"
+                print path_parts
+                print data
                 self.handle_local(path_parts, data)
 
             if self.server.is_byzantine and self.server.number_of_loyal_nodes == self.server.number_of_votes_collected:
