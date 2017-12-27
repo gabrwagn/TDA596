@@ -44,7 +44,8 @@ class BlackboardServer(HTTPServer):
         self.is_byzantine = False
         self.number_of_votes_collected = 0
         self.number_of_loyal_nodes = len(self.vessels) - 1
-        self.final_decision = ""
+        self.final_decision = "No decision"
+        self.true_result = "No result"
 
 #------------------------------------------------------------------------------------------------------
     # We add a value received to the vote one store
@@ -77,30 +78,44 @@ class BlackboardServer(HTTPServer):
         num_attacks = 0
         num_retreats = 0
 
-        for dictionary in self.vote_two_store:
-            for key in dictionary:
-                if dictionary[key] == "attack":
-                    num_attacks += 1
+        # Plan: Build a majority result vector by discarding minority byzantine votes
+
+        # Step 1: Count the different resulting votes per node from all vectors
+        # In other words, in the columns of nodes, count how many attack vs retreat
+        votes_per_node = dict()
+        for result_vector in self.vote_two_store:
+            for node in result_vector:
+                vote = result_vector[node]
+                if not node in votes_per_node:
+                    votes_per_node[node] = dict()
+                if not vote in votes_per_node[node]:
+                    votes_per_node[node][vote] = 1
                 else:
-                    num_retreats += 1
+                    votes_per_node[node][vote] += 1
+
+        # Step 2: Construct the true result by disregarding any minority node-vote pairs
+        # (Assumed to be created by byzantine nodes)
+        true_result = dict()
+        for node_votes in votes_per_node:
+            vote_a = node_votes.keys[0]
+            vote_b = node_votes.keys[1]
+
+            major_vote = vote_a if node_votes[vote_a] > node_votes[vote_b] else vote_b
+            true_result[node_votes] = major_vote
+
+        # Step 3: Count votes from the true result
+        for node in true_result:
+            if true_result[node] == "attack":
+                num_attacks += 1
+            elif true_result[node] == "retreat":
+                num_retreats += 1
+
+        # Step 4: Decide using the num of attack votes vs num of retreat votes
         self.final_decision = "attack" if num_attacks >= num_retreats else "retreat"
-        print self.vote_two_store
+        self.true_result = str(true_result)
+        print self.true_result
         print self.final_decision
 
-        # final_vector = [] # We just need a list for this
-        # temp_vector = []
-        # i = 0 # col number
-        # j = 0 # row number
-        # print self.vote_two_store
-        # while i < len(self.vote_two_store):
-        #     while j < len(self.vote_two_store):
-        #         temp_vector.append(self.vote_two_store[j][i + 1])
-        #         j += 1
-        #     final_vector.append(self.compute_result(temp_vector))
-        #     i += 1
-        # self.final_decision = self.compute_final_result(final_vector)
-        
-            
     def compute_result(self, vector):
         if "attack" in vector and "retreat" in vector:
             return "attack" # Default stategy
@@ -108,7 +123,7 @@ class BlackboardServer(HTTPServer):
             return "attack" # all nodes voted attack
         else:
             return "retreat" # all nodes voted retreat
-            
+
     def compute_final_result(self, vector):
         num_attacks = 0
         num_retreats = 0
@@ -163,9 +178,9 @@ class BlackboardServer(HTTPServer):
                 # A good practice would be to try again if the request failed
                 # Here, we do it only once
                 self.contact_vessel(vessel, path, data)
-    
-    # This function incorporates the same logic as the function given to use in the 
-    # Byzantine_behavior.py file but sends directly to nodes  
+
+    # This function incorporates the same logic as the function given to use in the
+    # Byzantine_behavior.py file but sends directly to nodes
     def byzantine_vote_one_to_other_vessels(self, d):
         count = 1
         data = {}
@@ -177,9 +192,9 @@ class BlackboardServer(HTTPServer):
                 else:
                     self.contact_vessel(vessel, "/vote/retreat", data)
                 count += 1
-    
+
     def byzantine_vote_two_to_other_vessels(self, data):
-        i = 0    
+        i = 0
         for vessel in self.vessels:
             sending_data = {}
             j = 1
@@ -190,7 +205,7 @@ class BlackboardServer(HTTPServer):
 
             if vessel != ("10.1.0.%s" % self.vessel_id):
                 i += 1
-            
+
 
 #------------------------------------------------------------------------------------------------------
 
@@ -243,12 +258,17 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # We set the response status code to 200 (OK)
         self.set_HTTP_headers(200)
         # We should do some real HTML here
-        html_reponse = frontpage_template_fo
+
+        if self.path == "/":
+            html_response = "".join(frontpage_template_fo)
+        elif self.path == "/vote/result":
+            html_response =  "<pre> {0} - {1} </pre>".format(self.server.final_decision, self.server.true_result)
+
         #In practice, go over the entries list,
         #produce the boardcontents part,
         #then construct the full page by combining all the parts ...
 
-        self.wfile.write(html_reponse)
+        self.wfile.write(html_response)
 #------------------------------------------------------------------------------------------------------
     # we might want some other functions
 #------------------------------------------------------------------------------------------------------
@@ -300,7 +320,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
                 self.retransmit("/vote/result", self.server.get_vote_vector())
 
         return
-        
+
     # def compute_fake_data(self):
     #     r_val = {}
     #     i = 0
@@ -335,7 +355,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         thread.start()
 
     def retransmit(self, path, data):
-        thread = Thread(target=self.server.propagate_value_to_vessels,args=(path, data)) # May need to reformat data 
+        thread = Thread(target=self.server.propagate_value_to_vessels,args=(path, data)) # May need to reformat data
         thread.daemon = True
         thread.start()
 
