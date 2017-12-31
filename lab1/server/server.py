@@ -282,7 +282,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # We should also parse the data received
         # and set the headers for the client
 
-        if self.server.final_decision != "":
+        if self.server.final_decision != "No decision":
             return
 
         data = self.parse_POST_request()
