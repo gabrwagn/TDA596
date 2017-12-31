@@ -194,6 +194,9 @@ class BlackboardServer(HTTPServer):
                 count += 1
 
     def byzantine_vote_two_to_other_vessels(self, data):
+        print "this is the data we are getting an index out of range on>>>>>>>>>>"
+        print "\n"
+        print data
         i = 0
         for vessel in self.vessels:
             sending_data = {}
