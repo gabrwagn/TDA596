@@ -258,7 +258,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # We set the response status code to 200 (OK)
         self.set_HTTP_headers(200)
         # We should do some real HTML here
-
+        html_response = ""
         if self.path == "/":
             html_response = "".join(frontpage_template_fo)
         elif self.path == "/vote/result":
