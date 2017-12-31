@@ -201,6 +201,8 @@ class BlackboardServer(HTTPServer):
         for vessel in self.vessels:
             sending_data = {}
             j = 1
+            print 'this is i'
+            print i
             for el in data[i]:
                 sending_data[j] = el
                 j += 1
