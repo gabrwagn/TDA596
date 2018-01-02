@@ -197,10 +197,15 @@ class BlackboardServer(HTTPServer):
                 count += 1
 
     def byzantine_vote_two_to_other_vessels(self, data):
+        print "this is the data we are getting an index out of range on>>>>>>>>>>"
+        print "\n"
+        print data
         i = 0
         for vessel in self.vessels:
             sending_data = {}
             j = 1
+            print 'this is i'
+            print i
             for el in data[i]:
                 sending_data[j] = el
                 j += 1
@@ -261,7 +266,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # We set the response status code to 200 (OK)
         self.set_HTTP_headers(200)
         # We should do some real HTML here
-
+        html_response = ""
         if self.path == "/":
             html_response = "".join(frontpage_template_fo)
         elif self.path == "/vote/result":
@@ -285,7 +290,7 @@ class BlackboardRequestHandler(BaseHTTPRequestHandler):
         # We should also parse the data received
         # and set the headers for the client
 
-        if self.server.final_decision != "":
+        if self.server.final_decision != "No decision":
             return
 
         data = self.parse_POST_request()
