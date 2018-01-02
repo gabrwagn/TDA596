@@ -100,8 +100,12 @@ class BlackboardServer(HTTPServer):
         for node in votes_per_node:
             vote_a = "retreat"
             vote_b = "attack"
-            votes_a = votes_per_node[node][vote_a]
-            votes_b = votes_per_node[node][vote_b]
+            votes_a = 0
+            votes_b = 0
+            if vote_a in votes_per_node[node]:
+                votes_a = votes_per_node[node][vote_a]
+            if vote_b in votes_per_node[node]:
+                votes_b = votes_per_node[node][vote_b]
 
             major_vote = vote_a if votes_a > votes_b else vote_b
             true_result[node] = major_vote
