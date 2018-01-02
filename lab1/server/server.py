@@ -99,13 +99,11 @@ class BlackboardServer(HTTPServer):
         for node in votes_per_node:
             vote_a = "retreat"
             vote_b = "attack"
-
             votes_a = votes_per_node[node]
             votes_b = votes_per_node[node]
 
             major_vote = vote_a if votes_a > votes_b else vote_b
             true_result[node] = major_vote
-
         # Step 3: Count votes from the true result
         for node in true_result:
             if true_result[node] == "attack":
@@ -197,15 +195,12 @@ class BlackboardServer(HTTPServer):
                 count += 1
 
     def byzantine_vote_two_to_other_vessels(self, data):
-        print "this is the data we are getting an index out of range on>>>>>>>>>>"
-        print "\n"
-        print data
         i = 0
         for vessel in self.vessels:
             sending_data = {}
             j = 1
-            print 'this is i'
-            print i
+            if i >= len(data):
+                break # This means byzantine is the last vessel and prevents index out of bounds
             for el in data[i]:
                 sending_data[j] = el
                 j += 1
@@ -408,8 +403,7 @@ if __name__ == '__main__':
             vessel_list.append("10.1.0.%d" % i) # We can add ourselves, we have a test in the propagation
 
 
-    #folder = os.path.join(os.getcwd(), "server", "vote_frontpage_template.html")
-    folder = os.path.join(os.getcwd(), "vote_frontpage_template.html")
+    folder = os.path.join(os.getcwd(), "server","vote_frontpage_template.html")
     frontpage_template_fo = list(open(folder, 'r'))
     # We launch a server
     server = BlackboardServer(('', PORT_NUMBER), BlackboardRequestHandler, vessel_id, vessel_list)
