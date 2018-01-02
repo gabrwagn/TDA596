@@ -204,8 +204,6 @@ class BlackboardServer(HTTPServer):
         for vessel in self.vessels:
             sending_data = {}
             j = 1
-            if i >= len(data):
-                break # This means byzantine is the last vessel and prevents index out of bounds
             for el in data[i]:
                 sending_data[j] = el
                 j += 1
