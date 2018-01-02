@@ -93,14 +93,15 @@ class BlackboardServer(HTTPServer):
                 else:
                     votes_per_node[node][vote] += 1
 
+        print(votes_per_node)
         # Step 2: Construct the true result by disregarding any minority node-vote pairs
         # (Assumed to be created by byzantine nodes)
         true_result = dict()
         for node in votes_per_node:
             vote_a = "retreat"
             vote_b = "attack"
-            votes_a = votes_per_node[node]
-            votes_b = votes_per_node[node]
+            votes_a = votes_per_node[node][vote_a]
+            votes_b = votes_per_node[node][vote_b]
 
             major_vote = vote_a if votes_a > votes_b else vote_b
             true_result[node] = major_vote
