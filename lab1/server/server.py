@@ -96,13 +96,15 @@ class BlackboardServer(HTTPServer):
         # Step 2: Construct the true result by disregarding any minority node-vote pairs
         # (Assumed to be created by byzantine nodes)
         true_result = dict()
-        for node_votes in votes_per_node:
-            vote_a = node_votes.keys[0]
-            vote_b = node_votes.keys[1]
+        for node in votes_per_node:
+            vote_a = "retreat"
+            vote_b = "attack"
+            
+            votes_a = votes_per_node[node][vote_a]
+            votes_b = votes_per_node[node][vote_b]
 
-            major_vote = vote_a if node_votes[vote_a] > node_votes[vote_b] else vote_b
-            true_result[node_votes] = major_vote
-
+            major_vote = vote_a if votes_a > votes_b else vote_b
+            true_result[node] = major_vote
         # Step 3: Count votes from the true result
         for node in true_result:
             if true_result[node] == "attack":
@@ -402,7 +404,7 @@ if __name__ == '__main__':
             vessel_list.append("10.1.0.%d" % i) # We can add ourselves, we have a test in the propagation
 
 
-    folder = os.path.join(os.getcwd(), "vote_frontpage_template.html")
+    folder = os.path.join(os.getcwd(), "server","vote_frontpage_template.html")
     frontpage_template_fo = list(open(folder, 'r'))
     # We launch a server
     server = BlackboardServer(('', PORT_NUMBER), BlackboardRequestHandler, vessel_id, vessel_list)
